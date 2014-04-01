@@ -24,13 +24,13 @@
 			$wutHappen->startSession();
 			
 			// Login funktio on helppo käyttää (sähköposti, salasana).
-			$wutHappen->login("c@d.fi", "Salasana5");
+			$wutHappen->login("b@c.fi", "Salasana5");
 			
 			// Lopetetaan sessio.
 			$wutHappen->endSession();
 			
 			// Rekisteröidään uusi käyttäjä (sähköposti, salasana).
-			$wutHappen->register("c@d.fi", "Salasana5");
+			$wutHappen->register("b@c.fi", "Salasana5", "Matti-Näsä");
 		?>
 	</body>
 </html>

@@ -1,70 +1,92 @@
-﻿CREATE TABLE wh_users(
-	uid INT(9) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	admin BOOL NOT NULL,
+﻿/// TABLES ///
+
+CREATE TABLE wh_users(
+	uid INT(6) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	email TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci NOT NULL,
+	password TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci NOT NULL,
+	userlevel INT(1) NOT NULL,
 	name TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
+	address TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
 	avatar TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
-	password TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
-	email TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci
+	VST TIMESTAMP NULL,
+	VET TIMESTAMP NULL
 );
 
 CREATE TABLE wh_events(
-	eid INT(9) NOT NULL AUTO_INCREMENT PRIMARY KEY,
-	ownerid INT(9) NOT NULL,
-	image TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
-	content TEXT CHARACTER SET utf8 COLLATe utf8_swedish_ci,
+	eid INT(6) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	ownerid INT(6) NOT NULL,
+	image INT(6),
+	content TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
+	date TIMESTAMP,
+	VST TIMESTAMP NULL,
+	VET TIMESTAMP NULL,
 	FOREIGN KEY(ownerid) REFERENCES wh_users(uid)
 );
 
 CREATE TABLE wh_friends(
-	person1 INT(9) NOT NULL,
-	person2 INT(9) NOT NULL,
-	invite BOOL NOT NULL,
+	person1 INT(6) NOT NULL,
+	person2 INT(6) NOT NULL,
+	VST TIMESTAMP NULL,
+	VET TIMESTAMP NULL,
 	FOREIGN KEY(person1) REFERENCES wh_users(uid),
 	FOREIGN KEY(person2) REFERENCES wh_users(uid)
 );
 
-CREATE TABLE wh_invited(
-	user INT(9) NOT NULL,
-	event INT(9) NOT NULL,
-	invite BOOL NOT NULL,
+CREATE TABLE wh_event_invites(
+	user INT(6) NOT NULL,
+	event INT(6) NOT NULL,
+	VST TIMESTAMP NULL,
+	VET TIMESTAMP NULL,
 	FOREIGN KEY(user) REFERENCES wh_users(uid),
 	FOREIGN KEY(event) REFERENCES wh_events(eid)
 );
 
+CREATE TABLE wh_friend_invites(
+	person1 INT(6) NOT NULL,
+	person2 INT(6) NOT NULL,
+	VST TIMESTAMP NULL,
+	VET TIMESTAMP NULL,
+	FOREIGN KEY(person1) REFERENCES wh_users(uid),
+	FOREIGN KEY(person2) REFERENCES wh_users(uid)
+);
+
+CREATE TABLE wh_user_messages(
+	umid INT(6) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	owner INT(6) NOT NULL,
+	message TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
+	VST TIMESTAMP NULL,
+	VET TIMESTAMP NULL,
+	FOREIGN KEY(owner) REFERENCES wh_users(uid)
+);
+
+CREATE TABLE wh_event_messages(
+	emid INT(6) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	owner INT(6) NOT NULL,
+	message TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
+	VST TIMESTAMP NULL,
+	VET TIMESTAMP NULL,
+	FOREIGN KEY(owner) REFERENCES wh_events(eid)
+);
+
+// INSERTS ///
+
 INSERT INTO wh_users(
-	admin,
-	name,
-	avatar,
+	email,
 	password,
-	email
+	userlevel,
+	name,
+	address,
+	avatar,
+	VST,
+	VET
 )
 VALUES(
-	0,
-	'Ökkö Äkkä',
-	'*insert avatar url*',
+	'a@b.fi',
 	'salasana',
-	'e.mail@gmail.com'
-);
-
-INSERT INTO wh_events(
-	ownerid,
-	image,
-	content
-)
-VALUES(
-	1,
-	'http://fc07.deviantart.net/fs70/f/2010/221/9/b/My_Forum_Avatar_by_Psychokill.png',
-	'Tapahtuman content'
-);
-
-INSERT INTO wh_friends VALUES(
-	1,
-	2,
-	1
-);
-
-INSERT INTO wh_invited VALUES(
-	2,
-	1,
-	1
+	0,
+	'Harri Möttönen',
+	'Möttökuja 3',
+	12,
+	CURRENT_TIMESTAMP,
+	NULL
 );

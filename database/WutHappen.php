@@ -54,7 +54,7 @@
 		}
 		
 		// Register user.
-		public function register($user, $pwd)
+		public function register($user, $pwd, $name)
 		{
 			// For email.
 			$regExp1 = '/^[a-z0-9\+\-_]+(\.[a-z0-9\+\-_]+)*@[a-z0-9\-]+(\.[a-z0-9\-]+)*\.[a-z]{2,6}$/i';
@@ -62,6 +62,7 @@
 			$regExp2 = '/[A-Z]+/';
 			$regExp3 = '/[0-9]+/';
 			$regExp4 = '/.{8,}/';
+			$regExp5 = "/^[\s,-.'\pL]+$/u";
 			
 			// Check email.
 			if(preg_match($regExp1, $user) == 0)
@@ -77,6 +78,13 @@
 				exit;
 			}
 			
+			// Check name.
+			if(preg_match($regExp5, $name) == 0)
+			{
+				echo("Nimi ei kelpaa!");
+				exit;
+			}
+			
 			// Add salt.
 			$pwd += $this->salt;
 			
@@ -87,12 +95,15 @@
 			$STH = @$this->DBH->query($sql);
 			if($STH->rowCount() == 0)
 			{
-				$sql = "INSERT INTO wh_users(admin, password, email) VALUES(
+				$sql = "INSERT INTO wh_users(email, password, userlevel, name, VST) VALUES(
+					:user,
+					:hashedPwd,
 					0,
-					'$hashedPwd',
-					'$user'
+					:name,
+					CURRENT_TIMESTAMP
 				);";
-				$STH = @$this->DBH->query($sql);
+				$STH = @$this->DBH->prepare($sql);
+				$STH->execute(array('user' => $user, 'hashedPwd' => $hashedPwd, 'name' => $name));
 			}
 			else {
 				echo("Sähköpostiosoite on jo käytössä.");
