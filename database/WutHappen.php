@@ -1,6 +1,7 @@
 <?php
 	// Includes.
 	require_once("./database/dbYhteys.php");
+	require_once("./libraries/htmlpurifier-4.6.0/library/HTMLPurifier.auto.php");
 	
 	// WutHappen class has all the server side functionality of the app.
 	class WutHappen
@@ -14,12 +15,6 @@
 		public function __construct()
 		{
 			$this->connectionInfo = getInfo(); // Save connection info from dbYhteys.php to an array.
-		}
-		
-		// Just for testing... not really needed.
-		public function getConnectionInfo()
-		{
-			return $this->connectionInfo;
 		}
 		
 		// Connect to the database.
@@ -55,58 +50,102 @@
 		
 		// Register user.
 		public function register($user, $pwd, $name)
-		{
-			// For email.
-			$regExp1 = '/^[a-z0-9\+\-_]+(\.[a-z0-9\+\-_]+)*@[a-z0-9\-]+(\.[a-z0-9\-]+)*\.[a-z]{2,6}$/i';
-			// For password.
-			$regExp2 = '/[A-Z]+/';
-			$regExp3 = '/[0-9]+/';
-			$regExp4 = '/.{8,}/';
-			$regExp5 = "/^[\s,-.'\pL]+$/u";
-			
+		{	
 			// Check email.
-			if(preg_match($regExp1, $user) == 0)
+			if(!$this->validateEmail($user))
 			{
-				echo("Email ei kelpaa!");
+				echo("Sähköposti ei kelpaa!");
 				exit;
 			}
 			
 			// Check password.
-			if(preg_match($regExp2, $pwd) == 0 || preg_match($regExp3, $pwd) == 0 || preg_match($regExp4, $pwd) == 0)
+			if(!$hashedPwd = $this->validatePassword($pwd))
 			{
-				echo("Salasana ei kelpaa!");
+				echo("Salasana ei kelpaa.");
 				exit;
 			}
 			
 			// Check name.
-			if(preg_match($regExp5, $name) == 0)
+			if(!$this->validateName($name))
 			{
 				echo("Nimi ei kelpaa!");
 				exit;
 			}
 			
-			// Add salt.
-			$pwd += $this->salt;
-			
-			// Hash the password.
-			$hashedPwd = hash('sha256', $pwd);
-			
 			$sql = "SELECT email FROM wh_users WHERE email='$user';";
 			$STH = @$this->DBH->query($sql);
 			if($STH->rowCount() == 0)
 			{
-				$sql = "INSERT INTO wh_users(email, password, userlevel, name, VST) VALUES(
+				$sql = "INSERT INTO wh_users(email, password, userlevel, name) VALUES(
 					:user,
 					:hashedPwd,
 					0,
-					:name,
-					CURRENT_TIMESTAMP
+					:name
 				);";
 				$STH = @$this->DBH->prepare($sql);
-				$STH->execute(array('user' => $user, 'hashedPwd' => $hashedPwd, 'name' => $name));
+				if($STH->execute(array('user' => $user, 'hashedPwd' => $hashedPwd, 'name' => $name)))
+					echo("Rekisteröinti onnistui.");
+				else
+					echo("Tapahtui virhe.");
+			}
+			else
+				echo("Sähköpostiosoite on jo käytössä.");
+		}
+		
+		private function validateEmail($user)
+		{
+			// For email.
+			$regExp1 = '/^[a-z0-9\+\-_]+(\.[a-z0-9\+\-_]+)*@[a-z0-9\-]+(\.[a-z0-9\-]+)*\.[a-z]{2,6}$/i';
+			// Check email.
+			if(preg_match($regExp1, $user) == 0)
+				return false;
+			else
+				return true;
+		}
+		
+		private function validatePassword($pwd)
+		{
+			// For password.
+			$regExp2 = '/[A-Z]+/';
+			$regExp3 = '/[0-9]+/';
+			$regExp4 = '/.{8,}/';
+			// Check password.
+			if(preg_match($regExp2, $pwd) == 0 || preg_match($regExp3, $pwd) == 0 || preg_match($regExp4, $pwd) == 0)
+				return false;
+			else {
+				// Add salt.
+				$pwd += $this->salt;
+				
+				// Hash the password.
+				$hashedPwd = hash('sha256', $pwd);
+				return $hashedPwd;
+			}
+		}
+		
+		private function validateName($name)
+		{
+			// For name.
+			$regExp5 = "/^[\s,-.'\pL]+$/u";
+			// Check name.
+			if(preg_match($regExp5, $name) == 0)
+				return false;
+			else
+				return true;
+		}
+		
+		public function generateGuestParameter()
+		{
+			mt_srand((double)microtime()*1000000);
+			$token = mt_rand(1, mt_getrandmax());
+			
+			$uid = uniqid(md5($token), true);
+			if($uid != false && $uid != '' && $uid != NULL)
+			{
+				$out = sha1($uid);
+				return $out;
 			}
 			else {
-				echo("Sähköpostiosoite on jo käytössä.");
+				return false;
 			}
 		}
 		
@@ -165,6 +204,143 @@
 					echo '</noscript>'; exit;
 				}
 			}
+		}
+		
+		public function addEvent($owner, $image, $content, $date)
+		{
+			// Date validation
+			$format = "Y-m-d H:i:s";
+			if(!($d = DateTime::createFromFormat($format, $date)))
+			{
+				echo("Päivämäärä virheellinen!");
+				exit;
+			}
+			
+			// Content validation.
+			// Default settings for HTMLPurifier.
+			$config = HTMLPurifier_Config::createDefault();
+			// Create new HTMLPurifier with the settings.
+			$purifier = new HTMLPurifier($config);
+			// Clean the content.
+			$content = $purifier->purify($content);
+			
+			// Event is valid 2 weeks after the event.
+			$vet = $d;
+			$vet->add(new DateInterval('P13D'));
+			$VET = $vet->format('Y-m-d H:i:s');
+			
+			// Change $d to string.
+			$d = $d->format('Y-m-d H:i:s');
+			
+			$sql = "INSERT INTO wh_events(ownerid, image, content, date, vst, vet) VALUES(
+				:owner,
+				:image,
+				:content,
+				:date,
+				CURRENT_TIMESTAMP,
+				:vet
+			);";
+			
+			$STH = @$this->DBH->prepare($sql);
+			$STH->execute(array('owner' => $owner, 'image' => $image, 'content' => $content, 'date' => $d, 'vet' => $VET));
+		}
+		
+		public function updateEvent($owner, $image, $content, $date, $eventid)
+		{
+			// Date validation
+			$format = "Y-m-d H:i:s";
+			if(!($d = DateTime::createFromFormat($format, $date)))
+			{
+				echo("Päivämäärä virheellinen!");
+				exit;
+			}
+			
+			// Content validation.
+			// Default settings for HTMLPurifier.
+			$config = HTMLPurifier_Config::createDefault();
+			// Create new HTMLPurifier with the settings.
+			$purifier = new HTMLPurifier($config);
+			// Clean the content.
+			$content = $purifier->purify($content);
+			
+			// Event is valid 2 weeks after the event.
+			$vet = $d;
+			$vet->add(new DateInterval('P13D'));
+			$VET = $vet->format('Y-m-d H:i:s');
+			
+			// Change $d to string.
+			$d = $d->format('Y-m-d H:i:s');
+			
+			/* UPDATE OLD ROW */
+			$sql = "UPDATE wh_events SET VET=CURRENT_TIMESTAMP WHERE eid=:eventid AND ownerid=:owner;";
+			$STH = @$this->DBH->prepare($sql);
+			$STH->execute(array('eventid' => $eventid, 'owner' => $owner));
+			if($STH->rowCount() == 1)
+			{
+				/* CREATE NEW ROW */
+				$sql = "INSERT INTO wh_events(ownerid, image, content, date, VST, VET) VALUES(
+					:owner,
+					:image,
+					:content,
+					:date,
+					CURRENT_TIMESTAMP,
+					:vet
+				);";
+				
+				$STH = @$this->DBH->prepare($sql);
+				if($STH->execute(array('owner' => $owner, 'image' => $image, 'content' => $content, 'date' => $d, 'vet' => $VET)))
+					echo("Muokkaus onnistui!");
+				else
+					echo("Tapahtui virhe!");
+			}
+			else {
+				echo("Tapahtui virhe!");
+			}
+	
+		}
+		
+		public function removeEvent($owner, $eventid)
+		{
+			/* UPDATE OLD ROW */
+			$sql = "UPDATE wh_events SET VET=CURRENT_TIMESTAMP WHERE eid=:eventid AND ownerid=:owner;";
+			$STH = @$this->DBH->prepare($sql);
+			if($STH->execute(array('eventid' => $eventid, 'owner' => $owner)))
+				echo("Poisto onnistui.");
+			else echo("Tapahtui virhe.");
+		}
+		
+		public function updateProfile($user, $pwd, $name, $address, $avatar)
+		{	
+			// Check password.
+			if(!$hashedPwd = $this->validatePassword($pwd))
+			{
+				echo("Salasana ei kelpaa.");
+				exit;
+			}
+			
+			// Check name.
+			if(!$this->validateName($name))
+			{
+				echo("Nimi ei kelpaa!");
+				exit;
+			}
+			
+			if($address != NULL)
+			{
+				// Address validation.
+				// Default settings for HTMLPurifier.
+				$config = HTMLPurifier_Config::createDefault();
+				// Create new HTMLPurifier with the settings.
+				$purifier = new HTMLPurifier($config);
+				// Clean the content.
+				$address = $purifier->purify($address);
+			}
+			
+			$sql = "UPDATE wh_users SET password=:password, name=:name, address=:address, avatar=:avatar WHERE uid=:user;";
+			$STH = @$this->DBH->prepare($sql);
+			if($STH->execute(array('password' => $hashedPwd, 'name' => $name, 'address' => $address, 'avatar' => $avatar, 'user' => $user)))
+				echo("Päivitys onnistui.");
+			else echo("Tapahtui virhe.");
 		}
 	}
 ?>

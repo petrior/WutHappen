@@ -7,9 +7,7 @@ CREATE TABLE wh_users(
 	userlevel INT(1) NOT NULL,
 	name TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
 	address TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
-	avatar TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
-	VST TIMESTAMP NULL,
-	VET TIMESTAMP NULL
+	avatar TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci
 );
 
 CREATE TABLE wh_events(
