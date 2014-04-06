@@ -42,7 +42,7 @@
 			//echo($wutHappen->generateGuestParameter());
 			
 			// Profiilin päivitys (käyttäjän id, salasana, nimi, osoite, avatar id)
-			$wutHappen->updateProfile(9, "Salasana5", "Urho Kekkonen", "katu 6", 1);
+			//$wutHappen->updateProfile(9, "Salasana5", "Urho Kekkonen", "katu 6", 1);
 		?>
 	</body>
 </html>

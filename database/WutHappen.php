@@ -30,7 +30,7 @@
 			}
 			// If connection fails, save error message to a log file.
 			catch(PDOException $e) {
-				echo "Could not connect to database.";
+				echo(json_encode("Could not connect to database."));
 				file_put_contents('./loki/PDOErrors.txt', $e->getMessage() . "\n", FILE_APPEND);
 			}
 		}
@@ -43,9 +43,9 @@
 		
 		public function endSession()
 		{
-			session_destroy();
 			unset($_SESSION['logged']);
 			unset($_SESSION['user']);
+			session_destroy();
 		}
 		
 		// Register user.
@@ -54,21 +54,21 @@
 			// Check email.
 			if(!$this->validateEmail($user))
 			{
-				echo("Sähköposti ei kelpaa!");
+				echo(json_encode("Sähköposti ei kelpaa!"));
 				exit;
 			}
 			
 			// Check password.
 			if(!$hashedPwd = $this->validatePassword($pwd))
 			{
-				echo("Salasana ei kelpaa.");
+				echo(json_encode("Salasana ei kelpaa."));
 				exit;
 			}
 			
 			// Check name.
 			if(!$this->validateName($name))
 			{
-				echo("Nimi ei kelpaa!");
+				echo(json_encode("Nimi ei kelpaa!"));
 				exit;
 			}
 			
@@ -84,12 +84,12 @@
 				);";
 				$STH = @$this->DBH->prepare($sql);
 				if($STH->execute(array('user' => $user, 'hashedPwd' => $hashedPwd, 'name' => $name)))
-					echo("Rekisteröinti onnistui.");
+					echo(json_encode(1));
 				else
-					echo("Tapahtui virhe.");
+					echo(json_encode("Tapahtui virhe."));
 			}
 			else
-				echo("Sähköpostiosoite on jo käytössä.");
+				echo(json_encode("Sähköpostiosoite on jo käytössä."));
 		}
 		
 		private function validateEmail($user)
@@ -158,10 +158,10 @@
 			{
 				$_SESSION['logged'] = true;
 				$_SESSION['user'] = $userId;
-				echo(1);
+				echo(json_encode(1));
 			}
 			else {
-				echo("Käyttäjätunnus tai salasana virheellinen.");
+				echo(json_encode("Käyttäjätunnus tai salasana virheellinen."));
 			}
 		}
 		
