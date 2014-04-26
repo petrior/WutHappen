@@ -6,3 +6,9 @@ database/dbYhteys.php
 
 # libraries
 libraries/
+
+# thumbs
+thumbs/
+
+# uploads
+uploads/
