@@ -43,6 +43,9 @@
 			
 			// Profiilin päivitys (käyttäjän id, salasana, nimi, osoite, avatar id)
 			//$wutHappen->updateProfile(9, "Salasana5", "Urho Kekkonen", "katu 6", 1);
+			
+			// Tapahtumien haku tietokannasta (haun tyyppi("own", "invited", "past"), käyttäjän id)
+			$wutHappen->getEvents("invited", 1);
 		?>
 	</body>
 </html>

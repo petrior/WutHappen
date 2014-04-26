@@ -18,105 +18,54 @@
 			
 			if(!$_SESSION['logged'])
 			{
-				header( 'Location: ./login.php' ) ;
+				header('Location: ./login.php');
 			}
 		?>
 		<div id="navBar">
 			<ul>
 				<li><a href="#" id="logout">Logout</a></li>
+				<li><a href="#" id="own">Omat tapahtumat</a></li>
+				<li><a href="#" id="invited">Kutsut</a></li>
+				<li><a href="#" id="past">Menneet tapahtumat</a></li>
+				<li><a href="#" id="newEvent">Luo tapahtuma</a></li>
 			</ul>
 		</div>
 		<div id="container">
-			
-			<div class="event">
-				<div class="eventBar">
-					<div class="eventImage">
-						<img class="eventImg" src="./images/yelp-logo1.jpg" onclick="showContent(this)"></img>
-					</div>
-					<div class="eventHeader">
-						<h3 class="eventH3" onclick="showContent(this)">Testitapahtuma 1</h3>
-						<p>12.4.2014</p>	
-						<div class="eventContent">
-							<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi elementum nisl vitae ipsum pulvinar luctus. Aliquam bibendum convallis nunc, quis pellentesque ligula rhoncus non. Fusce interdum eget sem sit amet tempus. Nullam lacus risus, rhoncus et turpis at, interdum euismod nisl. Curabitur purus nisi, porta id malesuada non, aliquam et massa. Duis condimentum orci non ultricies commodo. Donec nec nulla et tortor egestas semper. Nam adipiscing commodo lacinia. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Etiam condimentum nec erat at luctus. Vivamus vel turpis quis lectus pulvinar ornare. In ac semper nibh. Nam consequat consectetur odio, vitae volutpat erat scelerisque id. Nullam eget tincidunt nisl. Proin vitae feugiat velit, eu consequat leo.
-
-								Cras fermentum luctus semper. Nullam consequat faucibus interdum. Quisque vel erat sed mauris suscipit iaculis sit amet porttitor dolor. In pellentesque nibh ut risus tristique, nec viverra ligula convallis. Sed facilisis blandit placerat. Etiam ac pretium lorem. Integer at quam eget nulla dapibus congue ac id quam. Vivamus aliquet urna ac nulla congue lacinia. Nam dictum iaculis felis, quis pellentesque quam ornare a. In adipiscing, nibh in rutrum semper, enim risus commodo sem, et ultrices orci nibh sed purus. Maecenas facilisis mattis elit bibendum tempus. Proin leo nulla, porta nec rhoncus in, fermentum ut eros.
-							</p>
-						</div>
-						<div class="attendance">
-							<p class="total">120</p>
-							<p class="friends">12</p>
-						</div>
-					</div>
+			<div id="events"></div>
+			<div id="eventForm" class="eventForm">
+				<input class="eventInputBtn" type="button" value="Valitse kuva" id="choosePicture"></input>
+				<input class="eventInputBtn" type="button" id="loadPicture" value="Uusi kuva"></input>
+				<div id="pictureContainer"></div>
+				<div id="picturePicker">
+					<form id="pictureForm" enctype="multipart/form-data">
+						<button class="eventInputBtn" id="uploadFileBtn">Valitse tiedosto</button>
+						<input class="uploadInput" type="file" name="userFile" id="uploadInput"></input>
+						<input disabled="disabled" placeholder="Valitse tiedosto" type="text" class="eventInput fileName" id="fileName"></input>
+						<button class="eventInputBtn" id="uploadImage">Lataa</button>
+					</form>
 				</div>
+				<form id="contentForm">
+					<img id="eventFormImg"></img>
+					<input id="eHeader" class="eventInput" type="text" placeholder="Otsikko"></input>
+					<input id="eDate" class="eventInput eventInputDate" type="text" placeholder="Päivämäärä"></input>
+					<input id="eTime" class="eventInput eventInputTime" type="text" placeholder="Kello (00.00)"></input>
+					<input id="eLocation" class="eventInput" type="text" placeholder="Paikka"></input>
+					<textarea id="eContent" class="eventInputArea" placeholder="Kuvaus"></textarea>
+					<button class="eventInputBtn" id="createEvent">Luo tapahtuma</button>
+				</form>
 			</div>
-			
-			<div class="event">
-				<div class="eventBar">
-					<div class="eventImage">
-						<img class="eventImg" src="./images/wuthlogo.png" onclick="showContent(this)"></img>
-					</div>
-					<div class="eventHeader">
-						<h3 class="eventH3" onclick="showContent(this)">Testitapahtuma 2</h3>
-						<p>12.4.2014</p>	
-						<div class="eventContent">
-							<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi elementum nisl vitae ipsum pulvinar luctus. Aliquam bibendum convallis nunc, quis pellentesque ligula rhoncus non. Fusce interdum eget sem sit amet tempus. Nullam lacus risus, rhoncus et turpis at, interdum euismod nisl. Curabitur purus nisi, porta id malesuada non, aliquam et massa. Duis condimentum orci non ultricies commodo. Donec nec nulla et tortor egestas semper. Nam adipiscing commodo lacinia. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Etiam condimentum nec erat at luctus. Vivamus vel turpis quis lectus pulvinar ornare. In ac semper nibh. Nam consequat consectetur odio, vitae volutpat erat scelerisque id. Nullam eget tincidunt nisl. Proin vitae feugiat velit, eu consequat leo.
-
-								Cras fermentum luctus semper. Nullam consequat faucibus interdum. Quisque vel erat sed mauris suscipit iaculis sit amet porttitor dolor. In pellentesque nibh ut risus tristique, nec viverra ligula convallis. Sed facilisis blandit placerat. Etiam ac pretium lorem. Integer at quam eget nulla dapibus congue ac id quam. Vivamus aliquet urna ac nulla congue lacinia. Nam dictum iaculis felis, quis pellentesque quam ornare a. In adipiscing, nibh in rutrum semper, enim risus commodo sem, et ultrices orci nibh sed purus. Maecenas facilisis mattis elit bibendum tempus. Proin leo nulla, porta nec rhoncus in, fermentum ut eros.
-							</p>
-						</div>
-						<div class="attendance">
-							<p class="total">120</p>
-							<p class="friends">12</p>
-						</div>
-					</div>
-				</div>
-			</div>
-			
-			<div class="event">
-				<div class="eventBar">
-					<div class="eventImage">
-						<img class="eventImg" src="./images/nappialas.png" onclick="showContent(this)"></img>
-					</div>
-					<div class="eventHeader">
-						<h3 class="eventH3" onclick="showContent(this)">Testitapahtuma 3</h3>
-						<p>12.4.2014</p>	
-						<div class="eventContent">
-							<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi elementum nisl vitae ipsum pulvinar luctus. Aliquam bibendum convallis nunc, quis pellentesque ligula rhoncus non. Fusce interdum eget sem sit amet tempus. Nullam lacus risus, rhoncus et turpis at, interdum euismod nisl. Curabitur purus nisi, porta id malesuada non, aliquam et massa. Duis condimentum orci non ultricies commodo. Donec nec nulla et tortor egestas semper. Nam adipiscing commodo lacinia. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Etiam condimentum nec erat at luctus. Vivamus vel turpis quis lectus pulvinar ornare. In ac semper nibh. Nam consequat consectetur odio, vitae volutpat erat scelerisque id. Nullam eget tincidunt nisl. Proin vitae feugiat velit, eu consequat leo.
-
-								Cras fermentum luctus semper. Nullam consequat faucibus interdum. Quisque vel erat sed mauris suscipit iaculis sit amet porttitor dolor. In pellentesque nibh ut risus tristique, nec viverra ligula convallis. Sed facilisis blandit placerat. Etiam ac pretium lorem. Integer at quam eget nulla dapibus congue ac id quam. Vivamus aliquet urna ac nulla congue lacinia. Nam dictum iaculis felis, quis pellentesque quam ornare a. In adipiscing, nibh in rutrum semper, enim risus commodo sem, et ultrices orci nibh sed purus. Maecenas facilisis mattis elit bibendum tempus. Proin leo nulla, porta nec rhoncus in, fermentum ut eros.
-							</p>
-						</div>
-						<div class="attendance">
-							<p class="total">120</p>
-							<p class="friends">12</p>
-						</div>
-					</div>
-				</div>
-			</div>
-			
-			<div class="event">
-				<div class="eventBar">
-					<div class="eventImage">
-						<img class="eventImg" src="./images/database.jpg" onclick="showContent(this)"></img>
-					</div>
-					<div class="eventHeader">
-						<h3 class="eventH3" onclick="showContent(this)">Testitapahtuma 3</h3>
-						<p>12.4.2014</p>	
-						<div class="eventContent">
-							<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi elementum nisl vitae ipsum pulvinar luctus. Aliquam bibendum convallis nunc, quis pellentesque ligula rhoncus non. Fusce interdum eget sem sit amet tempus. Nullam lacus risus, rhoncus et turpis at, interdum euismod nisl. Curabitur purus nisi, porta id malesuada non, aliquam et massa. Duis condimentum orci non ultricies commodo. Donec nec nulla et tortor egestas semper. Nam adipiscing commodo lacinia. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Etiam condimentum nec erat at luctus. Vivamus vel turpis quis lectus pulvinar ornare. In ac semper nibh. Nam consequat consectetur odio, vitae volutpat erat scelerisque id. Nullam eget tincidunt nisl. Proin vitae feugiat velit, eu consequat leo.
-
-								Cras fermentum luctus semper. Nullam consequat faucibus interdum. Quisque vel erat sed mauris suscipit iaculis sit amet porttitor dolor. In pellentesque nibh ut risus tristique, nec viverra ligula convallis. Sed facilisis blandit placerat. Etiam ac pretium lorem. Integer at quam eget nulla dapibus congue ac id quam. Vivamus aliquet urna ac nulla congue lacinia. Nam dictum iaculis felis, quis pellentesque quam ornare a. In adipiscing, nibh in rutrum semper, enim risus commodo sem, et ultrices orci nibh sed purus. Maecenas facilisis mattis elit bibendum tempus. Proin leo nulla, porta nec rhoncus in, fermentum ut eros.
-							</p>
-						</div>
-						<div class="attendance">
-							<p class="total">120</p>
-							<p class="friends">12</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		
 		</div>
 		<script src="WutHappen.js"></script>
+		<script type="text/javascript">
+			// Do this when page loads...
+			$.ajax({
+				url: 'server.php',
+				data: { 'eventType':'invited' },
+				method: 'POST',
+				dataType: 'json'
+			}).done(function(data){
+				createList(data);
+			});
+		</script>
 	</body>
 </html>

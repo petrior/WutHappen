@@ -13,9 +13,12 @@ CREATE TABLE wh_users(
 CREATE TABLE wh_events(
 	eid INT(6) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	ownerid INT(6) NOT NULL,
-	image INT(6),
+	image TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
+	header TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
+	date DATE,
+	time TIME,
+	location TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
 	content TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
-	date TIMESTAMP,
 	VST TIMESTAMP NULL,
 	VET TIMESTAMP NULL,
 	FOREIGN KEY(ownerid) REFERENCES wh_users(uid)
@@ -66,6 +69,15 @@ CREATE TABLE wh_event_messages(
 	FOREIGN KEY(owner) REFERENCES wh_events(eid)
 );
 
+CREATE TABLE wh_images(
+	iid INT(6) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+	owner INT(6) NOT NULL,
+	url TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
+	thumb TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
+	VST TIMESTAMP NULL,
+	FOREIGN KEY(owner) REFERENCES wh_users(uid)
+);
+
 // INSERTS ///
 
 INSERT INTO wh_users(
@@ -88,3 +100,72 @@ VALUES(
 	CURRENT_TIMESTAMP,
 	NULL
 );
+
+INSERT INTO wh_events(
+	ownerid,
+	image,
+	content,
+	date,
+	VST,
+	VET
+)
+VALUES(
+	1,
+	1,
+	"Käyttäjän A tapahtuma A",
+	"2014-04-20 12:00:00",
+	CURRENT_TIMESTAMP,
+	"2014-04-30 08:00:00"
+);
+
+INSERT INTO wh_event_invites(
+	user,
+	event,
+	VST
+)
+VALUES(
+	2,
+	1,
+	CURRENT_TIMESTAMP
+);
+
+SELECT 
+	E.eid,
+	E.image,
+	E.header,
+	E.date,
+	E.time,
+	E.location,
+	E.content, 
+	E.VST, 
+	U.name, 
+	(SELECT 
+		COUNT(*)
+	FROM 
+		wh_friends F, 
+		wh_users UU, 
+		wh_event_invites EI 
+	WHERE 
+		  F.person1 = 1 
+		  AND F.person2 = UU.uid
+		  AND F.VET IS NULL
+		  AND EI.user = F.person2 
+		  AND EI.event = E.eid 
+		  AND EI.VET < CURRENT_TIMESTAMP) friends,
+	(SELECT
+		COUNT(*)
+	FROM
+		wh_event_invites EI
+	WHERE
+		EI.event = E.eid
+		AND EI.VET < CURRENT_TIMESTAMP) total
+FROM 
+	wh_events E, 
+	wh_users U 
+WHERE 
+	E.ownerid = 1 
+	AND E.ownerid = U.uid 
+	AND E.VET > CURRENT_TIMESTAMP
+ORDER BY
+	E.date ASC,
+	E.time ASC;

@@ -1,5 +1,5 @@
-@import url(http://fonts.googleapis.com/css?family=Oswald:400,300,700);
-@import url(http://fonts.googleapis.com/css?family=Source+Sans+Pro);
+@import url(https://fonts.googleapis.com/css?family=Oswald:400,300,700);
+@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro);
 
 /* http://meyerweb.com/eric/tools/css/reset/ 
    v2.0 | 20110126
@@ -71,6 +71,16 @@ table {
 	-moz-box-shadow: 0px 5px 6px #454545;
 	-webkit-box-shadow: 0px 5px 6px #454545;
 	box-shadow: 0px 5px 6px #454545;
+}
+
+#navBar ul li{
+	display: inline;
+	list-style-type: none;
+	padding-right: 20px;
+}
+
+#navBar ul li a{
+	color:#FFFFFF;
 }
 
 .event{
@@ -163,6 +173,217 @@ table {
 	text-align:center;
 }
 
+.eventForm{
+	background-color:#fff;
+	margin-bottom:10px;
+	-moz-box-shadow: 0px 2px 3px #454545;
+	-webkit-box-shadow: 0px 2px 3px #454545;
+	box-shadow: 0px 2px 3px #454545;
+	padding:10px;
+}
+
+#eventForm{
+	display:none;
+}
+
+#pictureContainer{
+	background-color:#fff;
+	margin-bottom:10px;
+	border:1px solid;
+	border-color:#A1A1A1;
+	display:none;
+	padding:10px;
+}
+
+#picturePicker{
+	background-color:#fff;
+	margin-bottom:10px;
+	border:1px solid;
+	border-color:#A1A1A1;
+	display:none;
+	padding:10px;
+}
+
+.eventInput{
+	-moz-box-sizing: border-box;
+	box-sizing:border-box;
+	width:100%;
+	margin:10px 0 10px 0;
+	padding:5px;
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size:0.9em;
+}
+
+.eventInputDate{
+	width:49%;
+}
+
+.eventInputTime{
+	float:right;
+	width:49%;
+}
+
+.eventInputArea{
+	-moz-box-sizing: border-box;
+	box-sizing:border-box;
+	width:100%;
+	margin:10px 0 10px 0;
+	padding:5px;
+	font-family: 'Source Sans Pro', sans-serif;
+	font-size:0.9em;
+	height:100px;
+}
+
+.eventInputCaption{
+	font-size:1.2rem;
+	font-family: 'Oswald', sans-serif;
+	margin:10px 0 10px 0;
+}
+
+.eventInputBtn {
+	font-family: 'Oswald', sans-serif;
+	border:1px solid #3357C4;
+	padding:10px;
+	margin:10px 10px 10px 0;
+	font-size:1.2em;
+	background-color:#436BE0;
+	color:#FFF;
+	-moz-border-radius:5px;
+	-webkit-border-radius:5px;
+	border-radius:5px;
+	cursor:pointer;
+}
+
+.uploadInput{
+	display:none;
+}
+
+.fileName{
+	width:200px;
+	margin-right:10px;
+}
+
+.eventInputBtn:hover{
+	background-color:#2F56CC;
+}
+
+#pictureContainer img{
+	padding:10px;
+}
+
+#eventFormImg{
+	max-height:150px;
+}
+
+progress[value] {
+  /* Reset the default appearance */
+  -webkit-appearance: none;
+   appearance: none;
+
+  width: 100%;
+  height: 20px;
+}
+
+progress[value]::-webkit-progress-bar {
+  background-color: #eee;
+  border-radius: 2px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.25) inset;
+}
+
+progress[value]::-webkit-progress-value {
+  background-image:
+	   -webkit-linear-gradient(-45deg, transparent 33%, #436BE0 33%, #436BE0 66%, transparent 66%),
+	   -webkit-linear-gradient(top, 
+	                           rgba(255, 255, 255, .25), 
+	                           rgba(0, 0, 0, .25)),
+	   -webkit-linear-gradient(left, #1D2366, #020521);
+
+    border-radius: 2px;
+    background-size: 40px 20px, 100% 100%, 100% 100%;
+	
+	-webkit-animation: animate-stripes 5s linear infinite;
+    animation: animate-stripes 5s linear infinite;
+}
+
+@-webkit-keyframes animate-stripes {
+   100% { background-position: -100px 0px; }
+}
+
+@keyframes animate-stripes {
+   100% { background-position: -100px 0px; }
+}
+
+.ui-datepicker{
+	font-family:'Source Sans Pro', sans-serif;
+	font-size:1em;
+	background-color:#fff;
+	-moz-box-shadow: 0px 3px 5px #454545;
+	-webkit-box-shadow: 0px 3px 5px #454545;
+	box-shadow: 0px 3x 5px #454545;
+	width:230px;
+	height:auto;
+}
+
+.ui-datepicker table{
+	width:100%;
+	border:1px solid;
+	border-color:#B8B8B8;
+}
+
+.ui-datepicker-header{
+	background-color:#436BE0;
+	padding:10px;
+}
+
+.ui-datepicker-title{
+	text-align:center;
+	font-size:1.2em;
+	font-weight:700;
+	color:#fff;
+}
+
+.ui-datepicker-prev, .ui-datepicker-next {  
+    display: inline-block;  
+    width: 20px;  
+    height: 20px;  
+    text-align: center;  
+    cursor: pointer;  
+    line-height: 600%;  
+    overflow: hidden;  
+}  
+
+.ui-datepicker-prev {  
+    float: left;  
+    background-position: center 0px; 
+	background-image: url('./images/arrow.png'); 
+	background-size:20px 20px;
+    background-repeat: no-repeat;
+}  
+.ui-datepicker-next {  
+    float: right;  
+    background-position: center 0px;
+background-image: url('./images/arrow2.png'); 
+	background-size:20px 20px;
+    background-repeat: no-repeat;	
+}  
+
+.ui-datepicker thead {
+	margin:5px;
+}
+
+.ui-datepicker th {
+	padding:5px;
+	border:1px solid;
+	border-color:#B8B8B8;
+	text-align:center;
+}
+
+.ui-datepicker td {
+	padding:5px;
+	border:1px solid;
+	border-color:#B8B8B8;
+	text-align:center;
+}
 
 @media screen and (max-width: 400px) {
 

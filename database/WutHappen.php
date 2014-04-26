@@ -206,43 +206,71 @@
 			}
 		}
 		
-		public function addEvent($owner, $image, $content, $date)
+		public function addEvent($owner, $image, $header, $date, $time, $location, $content)
 		{
+			$time .= ".00";
+			$dateTime = $date . " " . $time;
 			// Date validation
-			$format = "Y-m-d H:i:s";
-			if(!($d = DateTime::createFromFormat($format, $date)))
+			$format = "d.m.Y H.i.s";
+			if(!($d = DateTime::createFromFormat($format, $dateTime)))
 			{
-				echo("Päivämäärä virheellinen!");
+				echo(json_encode($dateTime));
 				exit;
 			}
+			
+			$format = "d.m.Y";
+			$mysqlDate = DateTime::createFromFormat($format, $date);
+			$mysqlDate = $mysqlDate->format("Y-m-d");
+			
+			$format = "H.i.s";
+			$mysqlTime = DateTime::createFromFormat($format, $time);
+			$mysqlTime = $mysqlTime->format("H:i:s");
 			
 			// Content validation.
 			// Default settings for HTMLPurifier.
 			$config = HTMLPurifier_Config::createDefault();
 			// Create new HTMLPurifier with the settings.
 			$purifier = new HTMLPurifier($config);
+			// Clean the image.
+			$image = $purifier->purify($image);
+			// Clean the header.
+			$header = $purifier->purify($header);
+			// Clean the location.
+			$location = $purifier->purify($location);
 			// Clean the content.
 			$content = $purifier->purify($content);
 			
-			// Event is valid 2 weeks after the event.
+			// Event is valid 1 day after the event.
 			$vet = $d;
-			$vet->add(new DateInterval('P13D'));
+			$vet->add(new DateInterval('P1D'));
 			$VET = $vet->format('Y-m-d H:i:s');
 			
 			// Change $d to string.
 			$d = $d->format('Y-m-d H:i:s');
 			
-			$sql = "INSERT INTO wh_events(ownerid, image, content, date, vst, vet) VALUES(
+			$sql = "INSERT INTO wh_events(ownerid, image, header, date, time, location, content, VST, VET) VALUES(
 				:owner,
 				:image,
+				:header,
+				:mysqlDate,
+				:mysqlTime,
+				:location,
 				:content,
-				:date,
 				CURRENT_TIMESTAMP,
 				:vet
 			);";
 			
 			$STH = @$this->DBH->prepare($sql);
-			$STH->execute(array('owner' => $owner, 'image' => $image, 'content' => $content, 'date' => $d, 'vet' => $VET));
+			if($STH->execute(array('owner' => $owner, 
+								'image' => $image,
+								'header' => $header,
+								'mysqlDate' => $mysqlDate,
+								'mysqlTime' => $mysqlTime,
+								'location' => $location,
+								'content' => $content,
+								'vet' => $VET)))
+			echo(json_encode("Lisäys onnistui"));
+			else echo(json_encode("Tapahtui virhe."));
 		}
 		
 		public function updateEvent($owner, $image, $content, $date, $eventid)
@@ -341,6 +369,310 @@
 			if($STH->execute(array('password' => $hashedPwd, 'name' => $name, 'address' => $address, 'avatar' => $avatar, 'user' => $user)))
 				echo("Päivitys onnistui.");
 			else echo("Tapahtui virhe.");
+		}
+		
+		// Get events.
+		public function getEvents($eventType, $owner)
+		{
+			switch($eventType)
+			{
+				case "own":
+					$sql = "SELECT 
+							E.eid,
+							E.image,
+							E.header,
+							E.date,
+							E.time,
+							E.location,
+							E.content, 
+							E.VST, 
+							U.name, 
+							(SELECT 
+								COUNT(*)
+							FROM 
+								wh_friends F, 
+								wh_users UU, 
+								wh_event_invites EI 
+							WHERE 
+								  F.person1 = :owner 
+								  AND F.person2 = UU.uid
+								  AND F.VET IS NULL
+								  AND EI.user = F.person2 
+								  AND EI.event = E.eid 
+								  AND EI.VET < CURRENT_TIMESTAMP) friends,
+							(SELECT
+								COUNT(*)
+							FROM
+								wh_event_invites EI
+							WHERE
+								EI.event = E.eid
+								AND EI.VET < CURRENT_TIMESTAMP) total
+						FROM 
+							wh_events E, 
+							wh_users U 
+						WHERE 
+							E.ownerid = :owner 
+							AND E.ownerid = U.uid 
+							AND E.VET > CURRENT_TIMESTAMP
+						ORDER BY
+							E.date ASC,
+							E.time ASC;";
+					break;
+				case "invited":
+					$sql = "SELECT 
+							E.eid,
+							E.image,
+							E.header,
+							E.date,
+							E.time,
+							E.location,
+							E.content, 
+							E.VST, 
+							U.name, 
+								(SELECT 
+									COUNT(*)
+								FROM 
+									wh_friends F, 
+									wh_users UU, 
+									wh_event_invites EI 
+								WHERE 
+									  F.person1 = :owner 
+									  AND F.person2 = UU.uid
+									  AND F.VET IS NULL
+									  AND EI.user = F.person2 
+									  AND EI.event = E.eid 
+									  AND EI.VET < CURRENT_TIMESTAMP) friends,
+								(SELECT
+									COUNT(*)
+								FROM
+									wh_event_invites EI
+								WHERE
+									EI.event = E.eid
+									AND EI.VET < CURRENT_TIMESTAMP) total
+							FROM 
+								wh_events E, 
+								wh_event_invites I, 
+								wh_users U
+							WHERE 
+								I.user = :owner 
+								AND U.uid = E.ownerid AND I.event = E.eid AND E.VET > CURRENT_TIMESTAMP 
+							ORDER BY 
+								E.date ASC,
+								E.time ASC;";
+					break;
+				case "past":
+					$sql = "(SELECT 
+							E.eid,
+							E.image,
+							E.header,
+							E.date,
+							E.time,
+							E.location,
+							E.content, 
+							E.VST, 
+							U.name, 
+								(SELECT 
+									COUNT(*)
+								FROM 
+									wh_friends F, 
+									wh_users UU, 
+									wh_event_invites EI 
+								WHERE 
+									  F.person1 = :owner 
+									  AND F.person2 = UU.uid
+									  AND F.VET IS NULL
+									  AND EI.user = F.person2 
+									  AND EI.event = E.eid 
+									  AND EI.VET < CURRENT_TIMESTAMP) friends,
+								(SELECT
+									COUNT(*)
+								FROM
+									wh_event_invites EI
+								WHERE
+									EI.event = E.eid
+									AND EI.VET < CURRENT_TIMESTAMP) total 
+							FROM 
+								wh_events E, 
+								wh_users U 
+							WHERE 
+								E.ownerid =:owner 
+								AND E.ownerid = U.uid 
+								AND E.VET < CURRENT_TIMESTAMP)
+								
+							UNION
+							
+							(SELECT 
+							E.eid,
+							E.image,
+							E.header,
+							E.date,
+							E.time,
+							E.location,
+							E.content, 
+							E.VST, 
+							U.name, 
+								(SELECT 
+									COUNT(*)
+								FROM 
+									wh_friends F, 
+									wh_users UU, 
+									wh_event_invites EI 
+								WHERE 
+									  F.person1 = :owner 
+									  AND F.person2 = UU.uid
+									  AND F.VET IS NULL
+									  AND EI.user = F.person2 
+									  AND EI.event = E.eid 
+									  AND EI.VET < CURRENT_TIMESTAMP) friends,
+								(SELECT
+									COUNT(*)
+								FROM
+									wh_event_invites EI
+								WHERE
+									EI.event = E.eid
+									AND EI.VET < CURRENT_TIMESTAMP) total
+							FROM 
+								wh_events E, 
+								wh_event_invites I, 
+								wh_users U
+							WHERE 
+								I.user =:owner 
+								AND U.uid = E.ownerid 
+								AND I.event = E.eid 
+								AND E.VET < CURRENT_TIMESTAMP)
+							ORDER BY 
+								date ASC,
+								time ASC;";
+					break;
+				default:
+					$sql = "SELECT 
+							E.eid,
+							E.image,
+							E.header,
+							E.date,
+							E.time,
+							E.location,
+							E.content, 
+							E.VST, 
+							U.name, 
+								(SELECT 
+									COUNT(*)
+								FROM 
+									wh_friends F, 
+									wh_users UU, 
+									wh_event_invites EI 
+								WHERE 
+									  F.person1 = :owner 
+									  AND F.person2 = UU.uid
+									  AND F.VET IS NULL
+									  AND EI.user = F.person2 
+									  AND EI.event = E.eid 
+									  AND EI.VET < CURRENT_TIMESTAMP) friends,
+								(SELECT
+									COUNT(*)
+								FROM
+									wh_event_invites EI
+								WHERE
+									EI.event = E.eid
+									AND EI.VET < CURRENT_TIMESTAMP) total
+							FROM 
+								wh_events E, 
+								wh_event_invites I, 
+								wh_users U
+							WHERE 
+								I.user = :owner 
+								AND U.uid = E.ownerid AND I.event = E.eid AND E.VET > CURRENT_TIMESTAMP 
+							ORDER BY 
+								E.date ASC,
+								E.time ASC;";
+					break;
+			}
+					
+			$STH = @$this->DBH->prepare($sql);
+			if($STH->execute(array('owner' => $owner)))
+			{
+				$STH->setFetchMode(PDO::FETCH_OBJ);
+				$events = Array();
+				while($row = $STH->fetch())
+				{
+					$events[] = $row;
+				}
+				
+				echo(json_encode($events));
+			}
+			else echo(json_encode("Tapahtui virhe."));
+		}
+		
+		public function uploadImage($file, $user, $size)
+		{
+			try
+			{
+				// Create new Upload-object.
+				$upload = Upload::factory('uploads');
+				// Allowed formats: jpeg, gif, png.
+				$upload->set_allowed_mime_types(array('image/jpeg', 'image/gif', 'image/png'));
+				// Assign file.
+				$upload->file($file);
+				// Limit file size to 0.5 Mbit
+				$upload->set_max_file_size(0.5);
+				
+				// Create a thumbnail object.
+				$thumb = new easyphpthumbnail();
+				
+				$size = $size/1024/1024;
+				
+				if($size > 0.5)
+				{
+					echo("Suurin sallittu tiedostokoko: 0.5 megatavua.");
+					exit;
+				}
+				
+				// Upload file to server.
+				$upload->upload();
+				if(!$upload->check())
+				{
+					echo($results["errors"][0]);
+					exit;
+				}
+				
+				$filePath = "./uploads/" . $results["filename"];
+				$thumbPath = "./thumbs/" . $results["filename"];
+				$owner = $user;
+				
+				// Use same name form thumbnail.
+				$thumb->Thumbfilename = $results["filename"];
+				// Folder for thumbnails.
+				$thumb->Thumblocation = "thumbs/";
+				// Set maximum thumbnail height.
+				$thumb->Thumbheight = 150;
+				// Create the thumbnail and save it as a file.
+				$thumb->Createthumb('uploads/' . $results["filename"], 'file');
+				
+				$sql = "INSERT INTO wh_images(owner, url, thumb, VST) VALUES(:owner, :filePath, :thumbPath, CURRENT_TIMESTAMP);";
+				$STH = @$this->DBH->prepare($sql);
+				$STH->execute(array('owner' => $owner, 'filePath' => $filePath, 'thumbPath' => $thumbPath));
+			} catch(Exception $e)
+			{
+				echo($e->getMessage());
+			}
+		}
+		
+		public function getImages($user)
+		{
+			$sql = "SELECT * FROM wh_images WHERE owner = :owner ORDER BY VST DESC;";
+			$STH = @$this->DBH->prepare($sql);
+			if($STH->execute(array('owner' => $user)))
+			{
+				$STH->setFetchMode(PDO::FETCH_OBJ);
+				$images = Array();
+				while($row = $STH->fetch())
+				{
+					$images[] = $row;
+				}
+				
+				echo(json_encode($images));
+			}
+			else echo(json_encode("Tapahtui virhe."));
 		}
 	}
 ?>
