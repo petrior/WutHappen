@@ -185,24 +185,30 @@
 			}
 		}
 		
+		// Redirect to URL
+		public function redirect($url)
+		{
+			if(!headers_sent())
+			{
+				header('Location: ' . $url);
+				exit;
+			} else {
+				echo '<script type="text/javascript">';
+				echo 'window.location.href="'.$url.'";';
+				echo '</script>';
+				echo '<noscript>';
+				echo '<meta http-equiv="refresh" content="0;url='.$url.'" />';
+				echo '</noscript>'; exit;
+			}
+		}
+		
 		// Force SSL
 		public function SSLon()
 		{
 			if($_SERVER['HTTPS'] != 'on')
 			{
 				$url = "https://".$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
-				if(!headers_sent())
-				{
-					header('Location: ' . $url);
-					exit;
-				} else {
-					echo '<script type="text/javascript">';
-					echo 'window.location.href="'.$url.'";';
-					echo '</script>';
-					echo '<noscript>';
-					echo '<meta http-equiv="refresh" content="0;url='.$url.'" />';
-					echo '</noscript>'; exit;
-				}
+				$this->redirect($url);
 			}
 		}
 		
@@ -291,9 +297,9 @@
 			// Clean the content.
 			$content = $purifier->purify($content);
 			
-			// Event is valid 2 weeks after the event.
+			// Event is valid 1 day after the event.
 			$vet = $d;
-			$vet->add(new DateInterval('P13D'));
+			$vet->add(new DateInterval('P1D'));
 			$VET = $vet->format('Y-m-d H:i:s');
 			
 			// Change $d to string.
@@ -418,7 +424,7 @@
 							E.date ASC,
 							E.time ASC;";
 					break;
-				case "invited":
+				case "others":
 					$sql = "SELECT 
 							E.eid,
 							E.image,
@@ -598,9 +604,9 @@
 					$events[] = $row;
 				}
 				
-				echo(json_encode($events));
+				return $events;
 			}
-			else echo(json_encode("Tapahtui virhe."));
+			else echo("Tapahtui virhe.");
 		}
 		
 		public function uploadImage($file, $user, $size)
@@ -628,12 +634,15 @@
 				}
 				
 				// Upload file to server.
-				$upload->upload();
-				if(!$upload->check())
+				//if(!$upload->check())
+				if(!$upload->upload())
 				{
+					echo("moi");
 					echo($results["errors"][0]);
 					exit;
 				}
+				
+				echo("moi");
 				
 				$filePath = "./uploads/" . $results["filename"];
 				$thumbPath = "./thumbs/" . $results["filename"];
@@ -648,6 +657,7 @@
 				// Create the thumbnail and save it as a file.
 				$thumb->Createthumb('uploads/' . $results["filename"], 'file');
 				
+			
 				$sql = "INSERT INTO wh_images(owner, url, thumb, VST) VALUES(:owner, :filePath, :thumbPath, CURRENT_TIMESTAMP);";
 				$STH = @$this->DBH->prepare($sql);
 				$STH->execute(array('owner' => $owner, 'filePath' => $filePath, 'thumbPath' => $thumbPath));
@@ -673,6 +683,35 @@
 				echo(json_encode($images));
 			}
 			else echo(json_encode("Tapahtui virhe."));
+		}
+		
+		public function inviteFriend($email, $user)
+		{
+			if(!$this->validateEmail($email))
+			{
+				echo("Email ei kelpaa");
+				exit;
+			}
+		
+			$sql = "SELECT U.uid FROM wh_users U, wh_friends F, wh_friend_invites FI WHERE U.email=:email AND FI.person2 != U.uid AND F.person1 != U.uid AND ;";
+			$STH = @$this->DBH->prepare($sql);
+			if($STH->execute(array('email' => $email)))
+			{
+				$STH->setFetchMode(PDO::FETCH_OBJ);
+				$row = $STH->fetch();
+				if($STH->rowCount() == 1 && $row->uid != $user)
+				{
+					$sql = "INSERT INTO wh_friend_invites(person1, person2, VST) VALUES(:user, :friend, CURRENT_TIMESTAMP);";
+					if($STH->execute(array('user' => $user, 'friend' => $row->uid)))
+					{
+						echo("Kutsu lähetetty.");
+					}
+					else
+					{
+						echo("Tapahtui virhe.");
+					}
+				}
+			}
 		}
 	}
 ?>

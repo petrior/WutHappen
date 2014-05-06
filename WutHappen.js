@@ -89,7 +89,7 @@ function login(email, pwd)
 			if(data != "1")
 				$('#lError').text(data);
 			else
-				window.location = './wuthappen.php';
+				window.location = './main.php';
 		});
 }
 
@@ -246,7 +246,7 @@ function createList(data)
 			eventContent.attr("class", "eventContent");
 			
 			var contentText = $('<p>');
-			contentText.text(data[index].content);
+			contentText.html(data[index].content.replace(/\n/gi, "<br>"));
 			
 			var attendance = $('<div>');
 			attendance.attr("class", "attendance");
