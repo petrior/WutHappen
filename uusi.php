@@ -164,7 +164,7 @@
 		//uploadError("Valitse ensin tiedosto.");
 		alert("Valitse ensin tiedosto.");
 	}
-	else if($('#uploadInput')[0].files[0].size/1024/1024 > 0.5)
+	else if($('#uploadInput')[0].files[0].size/1024/1024 > 1)
 	{
 		//uploadError("Maksimi tiedostokoko: 0,5 megatavua.");
 		alert("Maksimi tiedostokoko: 0,5 megatavua.");
@@ -191,9 +191,9 @@
 			},
 			success: function(msg){
 				$('progress').remove();
-				var message = $('<p>');
-				message.text(msg);
-				alert(msg);
+				console.log(msg);
+				$('#eventFormImg').attr("src", msg);
+				$('#kuva').val(msg);
 			},
 			error: function(msg){
 			console.log(msg);},

@@ -39,8 +39,7 @@
 				<li class="dropdownEvent">
 					<a href="#">Kaverit<img src="./images/arrowDown.png"></a>
 					<ul>
-						<li><a href=".\lisaakaveri.php">Lisää kaveri</a></li>
-						<li><a href="#">Kaverilista</a></li>
+						<li><a href=".\kaverilista.php">Kaverilista</a></li>
 					</ul>
 				</li>
 				<li class="dropdownEventRight floatRight">

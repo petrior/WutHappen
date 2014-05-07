@@ -282,3 +282,16 @@ table {
 .uploadInput{
 	display: none;
 }
+
+/*KAVERILISTA*/
+.friendList{
+	border:1px solid;
+	margin:5px auto 5px auto;
+	font-size:1.3em;
+	font-family:'Source Sans Pro', sans-serif;
+}
+
+.friendList tr, td, th {
+	border:1px solid;
+	padding:5px;
+}

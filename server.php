@@ -87,5 +87,7 @@
 	
 	//array_map('unlink', glob("uploads/*"));
 	//rmdir('uploads');
+	//array_map('unlink', glob("thumbs/*"));
+	//rmdir('thumbs');
 
 ?>

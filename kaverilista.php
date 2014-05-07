@@ -39,8 +39,7 @@
 				<li class="dropdownEvent selected">
 					<a href="#">Kaverit<img src="./images/arrowDown.png"></a>
 					<ul>
-						<li class="selected"><a href=".\lisaakaveri.php">Lisää kaveri</a></li>
-						<li><a href="#">Kaverilista</a></li>
+						<li class="selected"><a href=".\kaverilista.php">Kaverilista</a></li>
 					</ul>
 				</li>
 				<li class="dropdownEventRight floatRight">
@@ -52,19 +51,28 @@
 			</ul>
 		</div>
 		<div class="container">
-			<div class="event"><p class="eventOwner">Kaverit \ Lisää kaveri</p></div>
-			<?php
-				if(isset($_POST['email']))
-				{
-					$wutHappen->dbConnect();
-					echo($wutHappen->inviteFriend($_POST['email'], $_SESSION['user']));
-				}
-			?>
+			<div class="event"><p class="eventOwner">Kaverit \ Kaverilista</p></div>
 			<div class="event">
 				<form action="<?php echo($_SERVER['PHP_SELF']); ?>" method="post">
 					<input type="text" name="email" class="eventInput" placeholder="Kaverin sähköposti"></input>
 					<input type="submit" class="createButton" value="Lisää"></input>
 				</form>
+				<table class="friendList">
+					<tr><th>Nimi</th><th>Sähköposti</th></tr>
+					<?php
+					$wutHappen->dbConnect();
+					$friends = $wutHappen->getFriends($_SESSION['user']);
+					foreach($friends as $key=>$value): ?>
+						<tr><td><?php echo($friends[$key]->name); ?></td><td><?php echo($friends[$key]->email); ?></td></tr>
+					<?php endforeach; ?>
+					<?php
+						if(isset($_POST['email']))
+						{
+							$wutHappen->dbConnect();
+							echo($wutHappen->inviteFriend($_POST['email'], $_SESSION['user']));
+						}
+					?>
+				</table>
 			</div>
 		</div>
 		<script type="text/javascript" src="main.js"></script>
