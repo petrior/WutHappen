@@ -281,15 +281,25 @@
 			}
 		}
 		
-		public function updateEvent($owner, $image, $content, $date, $eventid)
+		public function updateEvent($owner, $image, $header, $date, $time, $location, $content, $eventid)
 		{
+			$time .= ".00";
+			$dateTime = $date . " " . $time;
 			// Date validation
-			$format = "Y-m-d H:i:s";
-			if(!($d = DateTime::createFromFormat($format, $date)))
+			$format = "d.m.Y H.i.s";
+			if(!($d = DateTime::createFromFormat($format, $dateTime)))
 			{
 				echo("Päivämäärä virheellinen!");
 				exit;
 			}
+			
+			$format = "d.m.Y";
+			$mysqlDate = DateTime::createFromFormat($format, $date);
+			$mysqlDate = $mysqlDate->format("Y-m-d");
+			
+			$format = "H.i.s";
+			$mysqlTime = DateTime::createFromFormat($format, $time);
+			$mysqlTime = $mysqlTime->format("H:i:s");
 			
 			// Content validation.
 			// Default settings for HTMLPurifier.
@@ -308,41 +318,58 @@
 			$d = $d->format('Y-m-d H:i:s');
 			
 			/* UPDATE OLD ROW */
-			$sql = "UPDATE wh_events SET VET=CURRENT_TIMESTAMP WHERE eid=:eventid AND ownerid=:owner;";
+			/*$sql = "UPDATE wh_events SET VET=CURRENT_TIMESTAMP WHERE eid=:eventid AND ownerid=:owner;";
 			$STH = @$this->DBH->prepare($sql);
 			$STH->execute(array('eventid' => $eventid, 'owner' => $owner));
 			if($STH->rowCount() == 1)
-			{
+
+			{*/
 				/* CREATE NEW ROW */
-				$sql = "INSERT INTO wh_events(ownerid, image, content, date, VST, VET) VALUES(
-					:owner,
-					:image,
-					:content,
-					:date,
-					CURRENT_TIMESTAMP,
-					:vet
-				);";
+
+
+
+				$sql = "UPDATE wh_events 
+				SET
+					image=:image,
+					header=:header,
+					date=:date,
+					time=:time,
+					location=:location,
+					content=:content,
+
+					VST=CURRENT_TIMESTAMP,
+
+
+					VET=:vet
+				WHERE 
+					eid=:eventid AND ownerid=:owner;";
 				
 				$STH = @$this->DBH->prepare($sql);
-				if($STH->execute(array('owner' => $owner, 'image' => $image, 'content' => $content, 'date' => $d, 'vet' => $VET)))
-					echo("Muokkaus onnistui!");
+				if($STH->execute(array('owner' => $owner, 'image' => $image, 'header' => $header, 'date' => $mysqlDate, 'time' => $mysqlTime, 'location' => $location, 'content' => $content, 'vet' => $VET, 'eventid' => $eventid)))
+
+				{
+					$this->redirect("./main.php?eventType=own");
+				}
 				else
 					echo("Tapahtui virhe!");
-			}
+
+			/*}
 			else {
 				echo("Tapahtui virhe!");
-			}
+
+			}*/
 	
 		}
 		
 		public function removeEvent($owner, $eventid)
 		{
-			/* UPDATE OLD ROW */
-			$sql = "UPDATE wh_events SET VET=CURRENT_TIMESTAMP WHERE eid=:eventid AND ownerid=:owner;";
+
+			$sql = "DELETE FROM wh_events WHERE eid=:eventid AND ownerid=:owner;";
 			$STH = @$this->DBH->prepare($sql);
 			if($STH->execute(array('eventid' => $eventid, 'owner' => $owner)))
 				echo("Poisto onnistui.");
 			else echo("Tapahtui virhe.");
+			echo("WutHappen.php");
 		}
 		
 		public function updateProfile($user, $pwd, $name, $address, $avatar)
@@ -803,6 +830,25 @@
 			{
 				echo("Tapahtui virhe");
 			}
+		}
+		
+		//GET EVENT
+		public function getEvent($eventId){
+
+
+			$sql = "SELECT * FROM
+							wh_events 
+						WHERE 
+							eid = :eventId;";
+
+				$STH = $this->DBH->prepare($sql);
+				$STH->execute(array('eventId' => $eventId));
+
+
+				$STH->setFetchMode(PDO::FETCH_ASSOC);
+				$row = $STH->fetch();
+
+				return($row);
 		}
 	}
 ?>

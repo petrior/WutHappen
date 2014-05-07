@@ -151,7 +151,7 @@
 		function selectImage(url){
 			$('#eventFormImg').attr("src", url);
 			$('#kuva').val(url);
-			$('#content').hide();
+			$('#content').toggle('show');
 		}
 		
 		$('#uploadImage').click(function(event){
