@@ -218,78 +218,86 @@
 			$dateTime = $date . " " . $time;
 			// Date validation
 			$format = "d.m.Y H.i.s";
-			if(!($d = DateTime::createFromFormat($format, $dateTime)) || substr($time, 0, 2) > 23 || substr($time, 3, 2) > 59)
+			if(!($d = DateTime::createFromFormat($format, $dateTime)))
 			{
-				echo("Kellonaika ei kelpaa");
+				echo(json_encode($dateTime));
+				exit;
 			}
-			else
-			{
 			
-				$format = "d.m.Y";
-				$mysqlDate = DateTime::createFromFormat($format, $date);
-				$mysqlDate = $mysqlDate->format("Y-m-d");
-				
-				$format = "H.i.s";
-				$mysqlTime = DateTime::createFromFormat($format, $time);
-				$mysqlTime = $mysqlTime->format("H:i:s");
-				
-				// Content validation.
-				// Default settings for HTMLPurifier.
-				$config = HTMLPurifier_Config::createDefault();
-				// Create new HTMLPurifier with the settings.
-				$purifier = new HTMLPurifier($config);
-				// Clean the image.
-				$image = $purifier->purify($image);
-				// Clean the header.
-				$header = $purifier->purify($header);
-				// Clean the location.
-				$location = $purifier->purify($location);
-				// Clean the content.
-				$content = $purifier->purify($content);
-				
-				// Event is valid 1 day after the event.
-				$vet = $d;
-				$vet->add(new DateInterval('P1D'));
-				$VET = $vet->format('Y-m-d H:i:s');
-				
-				// Change $d to string.
-				$d = $d->format('Y-m-d H:i:s');
-				
-				$sql = "INSERT INTO wh_events(ownerid, image, header, date, time, location, content, VST, VET) VALUES(
-					:owner,
-					:image,
-					:header,
-					:mysqlDate,
-					:mysqlTime,
-					:location,
-					:content,
-					CURRENT_TIMESTAMP,
-					:vet
-				);";
-				
-				$STH = @$this->DBH->prepare($sql);
-				if($STH->execute(array('owner' => $owner, 
-									'image' => $image,
-									'header' => $header,
-									'mysqlDate' => $mysqlDate,
-									'mysqlTime' => $mysqlTime,
-									'location' => $location,
-									'content' => $content,
-									'vet' => $VET)))
-				echo("Lisäys onnistui");
-				else echo("Tapahtui virhe.");
-			}
+			$format = "d.m.Y";
+			$mysqlDate = DateTime::createFromFormat($format, $date);
+			$mysqlDate = $mysqlDate->format("Y-m-d");
+			
+			$format = "H.i.s";
+			$mysqlTime = DateTime::createFromFormat($format, $time);
+			$mysqlTime = $mysqlTime->format("H:i:s");
+			
+			// Content validation.
+			// Default settings for HTMLPurifier.
+			$config = HTMLPurifier_Config::createDefault();
+			// Create new HTMLPurifier with the settings.
+			$purifier = new HTMLPurifier($config);
+			// Clean the image.
+			$image = $purifier->purify($image);
+			// Clean the header.
+			$header = $purifier->purify($header);
+			// Clean the location.
+			$location = $purifier->purify($location);
+			// Clean the content.
+			$content = $purifier->purify($content);
+			
+			// Event is valid 1 day after the event.
+			$vet = $d;
+			$vet->add(new DateInterval('P1D'));
+			$VET = $vet->format('Y-m-d H:i:s');
+			
+			// Change $d to string.
+			$d = $d->format('Y-m-d H:i:s');
+			
+			$sql = "INSERT INTO wh_events(ownerid, image, header, date, time, location, content, VST, VET) VALUES(
+				:owner,
+				:image,
+				:header,
+				:mysqlDate,
+				:mysqlTime,
+				:location,
+				:content,
+				CURRENT_TIMESTAMP,
+				:vet
+			);";
+			
+			$STH = @$this->DBH->prepare($sql);
+			if($STH->execute(array('owner' => $owner, 
+								'image' => $image,
+								'header' => $header,
+								'mysqlDate' => $mysqlDate,
+								'mysqlTime' => $mysqlTime,
+								'location' => $location,
+								'content' => $content,
+								'vet' => $VET)))
+			echo("Lisäys onnistui");
+			else echo("Tapahtui virhe.");
 		}
 		
-		public function updateEvent($owner, $image, $content, $date, $eventid)
+		public function updateEvent($owner, $image, $header, $date, $time, $location, $content, $eventid)
 		{
+			$time .= ".00";
+			$dateTime = $date . " " . $time;
 			// Date validation
-			$format = "Y-m-d H:i:s";
-			if(!($d = DateTime::createFromFormat($format, $date)))
+			$format = "d.m.Y H.i.s";
+			if(!($d = DateTime::createFromFormat($format, $dateTime)))
 			{
 				echo("Päivämäärä virheellinen!");
 				exit;
 			}
+			
+			$format = "d.m.Y";
+			$mysqlDate = DateTime::createFromFormat($format, $date);
+			$mysqlDate = $mysqlDate->format("Y-m-d");
+			
+			$format = "H.i.s";
+			$mysqlTime = DateTime::createFromFormat($format, $time);
+			$mysqlTime = $mysqlTime->format("H:i:s");
 			
 			// Content validation.
 			// Default settings for HTMLPurifier.
@@ -308,41 +316,47 @@
 			$d = $d->format('Y-m-d H:i:s');
 			
 			/* UPDATE OLD ROW */
-			$sql = "UPDATE wh_events SET VET=CURRENT_TIMESTAMP WHERE eid=:eventid AND ownerid=:owner;";
+			/*$sql = "UPDATE wh_events SET VET=CURRENT_TIMESTAMP WHERE eid=:eventid AND ownerid=:owner;";
 			$STH = @$this->DBH->prepare($sql);
 			$STH->execute(array('eventid' => $eventid, 'owner' => $owner));
 			if($STH->rowCount() == 1)
-			{
+			{*/
 				/* CREATE NEW ROW */
-				$sql = "INSERT INTO wh_events(ownerid, image, content, date, VST, VET) VALUES(
-					:owner,
-					:image,
-					:content,
-					:date,
-					CURRENT_TIMESTAMP,
-					:vet
-				);";
+				$sql = "UPDATE wh_events 
+				SET
+					image=:image,
+					header=:header,
+					date=:date,
+					time=:time,
+					location=:location,
+					content=:content,
+					VST=CURRENT_TIMESTAMP,
+					VET=:vet
+				WHERE 
+					eid=:eventid AND ownerid=:owner;";
 				
 				$STH = @$this->DBH->prepare($sql);
-				if($STH->execute(array('owner' => $owner, 'image' => $image, 'content' => $content, 'date' => $d, 'vet' => $VET)))
-					echo("Muokkaus onnistui!");
+				if($STH->execute(array('owner' => $owner, 'image' => $image, 'header' => $header, 'date' => $mysqlDate, 'time' => $mysqlTime, 'location' => $location, 'content' => $content, 'vet' => $VET, 'eventid' => $eventid)))
+				{
+					$this->redirect("./main.php?eventType=own");
+				}
 				else
 					echo("Tapahtui virhe!");
-			}
+			/*}
 			else {
 				echo("Tapahtui virhe!");
-			}
+			}*/
 	
 		}
 		
 		public function removeEvent($owner, $eventid)
 		{
-			/* UPDATE OLD ROW */
-			$sql = "UPDATE wh_events SET VET=CURRENT_TIMESTAMP WHERE eid=:eventid AND ownerid=:owner;";
+			$sql = "DELETE FROM wh_events WHERE eid=:eventid AND ownerid=:owner;";
 			$STH = @$this->DBH->prepare($sql);
 			if($STH->execute(array('eventid' => $eventid, 'owner' => $owner)))
 				echo("Poisto onnistui.");
 			else echo("Tapahtui virhe.");
+			echo("WutHappen.php");
 		}
 		
 		public function updateProfile($user, $pwd, $name, $address, $avatar)
@@ -611,66 +625,16 @@
 			else echo("Tapahtui virhe.");
 		}
 		
-		
-		public function uploadImage($file, $user, $size)
-		{
-			// Luodaan uusi Upload-objekti.
-			$upload = Upload::factory('uploads');
-			// Asetetaan objektin tiedostoksi formista saatu tiedosto.
-			$upload->file($file);
-			// Rajoitetaan tiedoston koko noin 200 kbit.
-			$upload->set_max_file_size(1);
-			// Sallitut tiedostotyypit: jpeg, gif, png.
-			$upload->set_allowed_mime_types(array('image/jpeg', 'image/gif', 'image/png'));
-			
-			// Luodaan uusi thumbnailobjekti.
-			$thumb = new easyphpthumbnail();
-
-			// Kokeillaan suorittaa koodiblokki, heitetään Exception virheen sattuessa.
-			try{
-				// Uploadataan tiedosto palvelimelle ja tallennetaan infoa $results -muuttujaan.
-				$results = $upload->upload();
-				
-				// Jos upload ei onnistunut heitetään Exception ja haetaan $results:sta ensimmäinen virheteksti.
-				if(!$results["status"])
-					throw new Exception($results["errors"][0]);
-					
-				$filePath = "./uploads/" . $results["filename"];
-				$thumbPath = "./thumbs/" . $results["filename"];
-				
-				// Haetaan thumbnailille tiedostonimi $results:sta.
-				$thumb->Thumbfilename = $results["filename"];
-				// Tallennetaan thumbnail kansioon:
-				$thumb->Thumblocation = "thumbs/";
-				// Rajoitetaan thumbnailin leveys (px).
-				$thumb->Thumbwidth = 150;
-				// Luodaan thumbnail ja tallennetaan se tiedostona.
-				$thumb->Createthumb('uploads/' . $results["filename"], 'file');
-			
-				$sql = "INSERT INTO wh_images(owner, url, thumb, VST) VALUES(:owner, :filePath, :thumbPath, CURRENT_TIMESTAMP);";
-				$STH = @$this->DBH->prepare($sql);
-				$STH->execute(array('owner' => $user, 'filePath' => $filePath, 'thumbPath' => $thumbPath));
-				echo($filePath);
-			} 
-			// Jos löydetään virhe, tulostetaan virheilmoitus.
-			catch(Exception $e)
-			{
-				echo($e->getMessage());
-			}
-		}
-		
-		
-		/*
 		public function uploadImage($file, $user, $size)
 		{
 			try
 			{
 				// Create new Upload-object.
 				$upload = Upload::factory('uploads');
-				// Assign file.
-				$upload->file($file);
 				// Allowed formats: jpeg, gif, png.
 				$upload->set_allowed_mime_types(array('image/jpeg', 'image/gif', 'image/png'));
+				// Assign file.
+				$upload->file($file);
 				// Limit file size to 0.5 Mbit
 				$upload->set_max_file_size(0.5);
 				
@@ -681,19 +645,20 @@
 				
 				if($size > 0.5)
 				{
-					echo("Suurin sallittu tiedostokoko: 0.5 megatavua."); $_GET['id']
+					echo("Suurin sallittu tiedostokoko: 0.5 megatavua.");
 					exit;
 				}
 				
 				// Upload file to server.
-				$results = $upload->upload();
-				if($upload->check())
+				//if(!$upload->check())
+				if(!$upload->upload())
 				{
-					//echo("moi");
+					echo("moi");
 					echo($results["errors"][0]);
-					//var_dump($results);
 					exit;
 				}
+				
+				echo("moi");
 				
 				$filePath = "./uploads/" . $results["filename"];
 				$thumbPath = "./thumbs/" . $results["filename"];
@@ -717,8 +682,6 @@
 				echo($e->getMessage());
 			}
 		}
-		*/
-		
 		
 		public function getImages($user)
 		{
@@ -746,29 +709,15 @@
 				exit;
 			}
 		
-			$sql = "SELECT U.uid 
-			FROM 
-				wh_users U
-			WHERE 
-				U.email = :email 
-				AND NOT EXISTS (SELECT * FROM wh_friends WHERE person1 = U.uid AND person2 = :user) 
-				AND NOT EXISTS (SELECT * FROM wh_friend_invites WHERE person1 = :user AND person2 = U.uid)";
-			/*SELECT U.uid 
-			FROM 
-				wh_users U 
-			WHERE 
-				U.email = "a@b.fi" 
-				AND NOT EXISTS (SELECT * FROM wh_friends WHERE person1 = 1 AND person2 = 4) 
-				AND NOT EXISTS (SELECT * FROM wh_friend_invites WHERE person1 = 4 AND person2 = U.uid)*/
+			$sql = "SELECT U.uid FROM wh_users U, wh_friends F, wh_friend_invites FI WHERE U.email=:email AND FI.person2 != U.uid AND F.person1 != U.uid AND ;";
 			$STH = @$this->DBH->prepare($sql);
-			if($STH->execute(array('email' => $email, 'user' => $user)))
+			if($STH->execute(array('email' => $email)))
 			{
 				$STH->setFetchMode(PDO::FETCH_OBJ);
 				$row = $STH->fetch();
 				if($STH->rowCount() == 1 && $row->uid != $user)
 				{
 					$sql = "INSERT INTO wh_friend_invites(person1, person2, VST) VALUES(:user, :friend, CURRENT_TIMESTAMP);";
-					$STH = $this->DBH->prepare($sql);
 					if($STH->execute(array('user' => $user, 'friend' => $row->uid)))
 					{
 						echo("Kutsu lähetetty.");
@@ -778,31 +727,21 @@
 						echo("Tapahtui virhe.");
 					}
 				}
-				else
-				{
-					echo("Ehkä jo kaveri?");
-				}
 			}
 		}
 		
-		public function getFriends($user)
-		{
-			$sql = "SELECT U.name, U.email FROM wh_friends F, wh_users U WHERE F.person1 = :user AND F.person2 = U.uid";
-			$STH = $this->DBH->prepare($sql);
-			if($STH->execute(array('user' => $user)))
-			{
-				$friends = Array();
-				$STH->setFetchMode(PDO::FETCH_OBJ);
-				while($row = $STH->fetch())
-				{
-					$friends[] = $row;
-				}
-				return $friends;
-			}
-			else
-			{
-				echo("Tapahtui virhe");
-			}
+		//GET EVENT
+		public function getEvent($eventId){
+			$sql = "SELECT * FROM
+							wh_events 
+						WHERE 
+							eid = :eventId;";
+
+				$STH = $this->DBH->prepare($sql);
+				$STH->execute(array('eventId' => $eventId));
+				$STH->setFetchMode(PDO::FETCH_ASSOC);
+				$row = $STH->fetch();
+				return($row);
 		}
 	}
 ?>

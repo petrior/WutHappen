@@ -39,7 +39,8 @@
 				<li class="dropdownEvent">
 					<a href="#">Kaverit<img src="./images/arrowDown.png"></a>
 					<ul>
-						<li><a href=".\kaverilista.php">Kaverilista</a></li>
+						<li><a href=".\lisaakaveri.php">Lisää kaveri</a></li>
+						<li><a href="#">Kaverilista</a></li>
 					</ul>
 				</li>
 				<li class="dropdownEventRight floatRight">
@@ -96,9 +97,10 @@
 								<p class="total"><?php echo($events[$key]->total); ?></p>
 								<p class="friends"><?php echo($events[$key]->friends); ?></p>
 								<?php
-									if($eventType == "past")
+									if($eventType == "own")
 									{
 										echo('<a href="./muokkaus.php?id=' . $events[$key]->eid . '"><i class="fa fa-pencil fa-2x"></i></a>');
+										echo('<i class="fa fa-trash-o fa-2x" onclick="deleteEvent(' . $events[$key]->eid . ')"></i>');
 									}
 								?>
 								<i class="fa fa-group fa-2x"></i>								

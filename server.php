@@ -62,6 +62,12 @@
 		$wutHappen->getImages($_SESSION['user']);
 	}
 	
+	// DELETE EVENT
+	if(isset($_POST['deleteEventId'])){
+		$wutHappen->dbConnect();
+		$wutHappen->removeEvent($_SESSION['user'], $_POST['deleteEventId']);
+	}
+	
 	// CREATE EVENT
 	if(isset($_POST['image']) && 
 		isset($_POST['header']) && 
@@ -87,7 +93,5 @@
 	
 	//array_map('unlink', glob("uploads/*"));
 	//rmdir('uploads');
-	//array_map('unlink', glob("thumbs/*"));
-	//rmdir('thumbs');
 
 ?>
