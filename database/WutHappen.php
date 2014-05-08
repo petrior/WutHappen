@@ -734,9 +734,9 @@
 					if($STH->execute(array('user' => $user, 'friend' => $row->uid)))
 					{
 						$message = $row->name . " (" . $row->email . ") haluaa olla kaverisi";
-						$sql = "INSERT INTO wh_user_messages(owner, message, message_type, VST) VALUES(:friend, :message, 1, CURRENT_TIMESTAMP);";
+						$sql = "INSERT INTO wh_user_messages(owner, message, uid, VST) VALUES(:friend, :message, :owner, CURRENT_TIMESTAMP);";
 						$STH = $this->DBH->prepare($sql);
-						$STH->execute(array('friend' => $row->uid, 'message' => $message));
+						$STH->execute(array('friend' => $row->uid, 'message' => $message, 'owner' => $user));
 						
 						echo("Kutsu lähetetty.");
 					}
@@ -804,6 +804,29 @@
 				$messages[] = $row;
 			}
 			return $messages;
+		}
+		
+		// CONFIRM FRIEND
+		public function confirmFriend($friend, $user, $msgid)
+		{
+			$sql = "INSERT INTO wh_friends(person1, person2, VST) VALUES(:friend, :user, CURRENT_TIMESTAMP), (:user, :friend, CURRENT_TIMESTAMP);";
+			$STH = $this->DBH->prepare($sql);
+			if($STH->execute(array('friend' => $friend, 'user' => $user)))
+			{
+				$sql = "UPDATE wh_friend_invites SET VET=CURRENT_TIMESTAMP WHERE person1 = :friend AND person2 = :user;";
+				$STH = $this->DBH->prepare($sql);
+				$STH->execute(array('friend' => $friend, 'user' => $user));
+				
+				$sql = "UPDATE wh_user_messages SET VET=CURRENT_TIMESTAMP WHERE umid=:msgid;";
+				$STH = $this->DBH->prepare($sql);
+				$STH->execute(array('msgid' => $msgid));
+				
+				$sql = "INSERT INTO wh_user_messages(owner, message, VST) SELECT :friend, CONCAT(name, ' on nyt kaverisi'), CURRENT_TIMESTAMP FROM wh_users WHERE uid = :friend;";
+				$STH = $this->DBH->prepare($sql);
+				$STH->execute(array('friend' => $friend));
+				
+				echo(1);
+			}
 		}
 	}
 ?>

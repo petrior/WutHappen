@@ -43,7 +43,7 @@
 				<?php 
 					if(count($messages) > 0)
 					{
-						echo("<li class='selected'><a id='msgNumber' href='#' class='navIcon'><i class='fa fa-exclamation-circle'></i>" . count($messages) . "</a></li>");
+						echo("<li class='selected'><a href='#' class='navIcon'><i class='fa fa-exclamation-circle'></i><span id='msgNumber'>" . count($messages) . "</span></a></li>");
 					}
 				?>
 				<li class="dropdownEventRight floatRight">
@@ -57,8 +57,10 @@
 		<div class="container">
 			<div class="event"><p class="eventOwner">Ilmoitukset</p></div>
 			<div class="event">
-				<table>
-					
+				<table class="friendList">
+					<?php foreach($messages as $key=>$value): ?>
+					<tr><td><?php echo($messages[$key]->message); ?></td><td><button class="eventInputBtn" onclick="confirmFriendInvite(this, <?php echo($messages[$key]->uid . "," . $messages[$key]->umid); ?>)">Vahvista</button></td><td><button class="eventInputBtn">Hylkää</button></td></tr>
+					<?php endforeach; ?>
 				</table>
 			</div>
 		</div>

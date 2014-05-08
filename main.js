@@ -62,3 +62,21 @@ function showContent(dom)
 		}, 500);
 	}
 }
+
+// ILMOITUKSET
+function confirmFriendInvite(dom, id, msgid)
+{
+	$.ajax({
+		url: 'server.php',
+		data: { 'confirmFriend':id, 'msgid':msgid },
+		method: 'POST',
+		error: function(data){
+		}
+	}).done(function(data){
+		if(data == 1)
+		{
+			$(dom).parent().parent().remove();
+			$('#msgNumber').text(parseInt($('#msgNumber').text()) - 1);
+		}
+	});
+}

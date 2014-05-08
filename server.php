@@ -87,6 +87,17 @@
 		$wutHappen->addEvent($owner, $image, $header, $date, $time, $location, $content);
 	}
 	
+	// CONFIRM FRIEND
+	if(isset($_POST['confirmFriend']) && isset($_POST['msgid']))
+	{
+		$friendId = $_POST['confirmFriend'];
+		$user = $_SESSION['user'];
+		$msgid = $_POST['msgid'];
+		
+		$wutHappen->dbConnect();
+		$wutHappen->confirmFriend($friendId, $user, $msgid);
+	}
+	
 	//if(!file_exists('uploads')) mkdir('uploads', 0755);
 	//if(!file_exists('thumbs')) mkdir('thumbs', 0755);
 	

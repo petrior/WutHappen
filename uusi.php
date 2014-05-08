@@ -8,7 +8,6 @@
 		<link rel="stylesheet" type="text/css" href="main.css">
 		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
 		<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
-		<script type="text/javascript" src="http://jqueryui.com/ui/i18n/jquery.ui.datepicker-fi.js"></script>
 		<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 		<script>
 		  $(function() {
@@ -74,7 +73,7 @@
 				<?php 
 					if(count($messages) > 0)
 					{
-						echo("<li><a id='msgNumber' href='./ilmiotukset.php' class='navIcon'><i class='fa fa-exclamation-circle'></i>" . count($messages) . "</a></li>");
+						echo("<li><a id='msgNumber' href='./ilmoitukset.php' class='navIcon'><i class='fa fa-exclamation-circle'></i>" . count($messages) . "</a></li>");
 					}
 				?>
 				<li class="dropdownEventRight floatRight">
