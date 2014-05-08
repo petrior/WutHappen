@@ -8,7 +8,7 @@ $('.dropdownEvent').mouseout(function(){
 
 $('.dropdownEventRight').mouseover(function(){
 	$(this).find("ul").css({
-		"left":-$(this).outerWidth() - 14 + "px"
+		"left":-$(this).outerWidth() + 78 + "px"
 	});
 });
 
