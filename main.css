@@ -33,6 +33,7 @@ footer, header, hgroup, menu, nav, section {
 }
 body {
 	line-height: 1;
+	background-color: #114A6B;
 }
 ol, ul {
 	list-style: none;
@@ -57,14 +58,14 @@ table {
 	top:0;
 	left:0;
 	width:100%;
-	background-color:#436BE0;
+	background-color:#2D89BF;
 	height:50px;
 }
 
 .horizontalNav {
 	max-width:800px;
 	height:100%;
-	background-color:#888;
+	background-color:#2D89BF;
 	margin-left:auto;
 	margin-right:auto;
 }
@@ -72,7 +73,6 @@ table {
 .horizontalNav li{
 	display:inline-table;
 	height:100%;
-	color:#000;
 	position:relative;
 	margin-right:-4px;
 	padding:0 5px 0 5px;
@@ -93,13 +93,13 @@ table {
 	white-space:nowrap;
 	height:50px;
 	width:calc(100% - 10px);
-	background-color:#888;
+	background-color:#64A9D1;
 	margin:0;
 	border:none;
 }
 
 .horizontalNav li:hover ul li:hover, .horizontalNav li:hover {
-	background-color:#D9D9D9 !important;
+	background-color:#5DC3FF !important;
 }
 
 .horizontalNav a:active{
@@ -125,7 +125,7 @@ table {
 }
 
 .selected {
-	background-color:#737373 !important;
+	background-color:#246F9C !important;
 }
 
 .floatRight {
@@ -147,9 +147,10 @@ table {
 	max-width:800px;
 	margin:0 auto 0 auto;
 	padding-top:50px;
-	background-color:#444;
+	background-color:#FFF;
 	z-index:-1;
 	padding-bottom:1px;
+	background-color:rgba(255, 255, 255, 0.0);
 }
 
 /* EVENT */
@@ -158,7 +159,11 @@ table {
 	display:table;
 	background-color:#fff;
 	width:calc(100% - 10px);
-	margin:5px;
+	margin:3px 0px 0px 1px;
+	border:3px solid #86B4D1;
+	-webkit-border-radius: 6px;
+	-moz-border-radius: 6px;
+	border-radius: 6px;
 }
 
 .eventImage {
@@ -273,7 +278,7 @@ table {
 	font-size:1em;
 	font-family:'Source Sans Pro', sans-serif;
 	padding:5px;
-	background-color:#40C768;
+	background-color:#43DB35;
 	text-align:center;
 	float:left;
 	width:50px;
@@ -287,6 +292,10 @@ table {
 .fa {
 	margin:3px;
 	cursor:pointer;
+	color:#2D89BF;
+}
+.fa-envelope-o{
+	color: #000;
 }
 .uploadInput{
 	display: none;

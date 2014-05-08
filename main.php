@@ -48,11 +48,11 @@
 				<?php 
 					if(count($messages) > 0)
 					{
-						echo("<li><a id='msgNumber' href='./ilmoitukset.php' class='navIcon'><i class='fa fa-exclamation-circle'></i>" . count($messages) . "</a></li>");
+						echo("<li><a id='msgNumber' href='./ilmoitukset.php' class='navIcon'><i class='fa fa-envelope-o'></i>" . count($messages) . "</a></li>");
 					}
 				?>
 				<li class="dropdownEventRight floatRight">
-					<a href="#">User</a>
+					<a href="#">Käyttäjä<img src="./images/arrowDown.png"></a>
 					<ul>
 						<li><a href="<?php echo($_SERVER['PHP_SELF'] . "?logout=true"); ?>">Kirjaudu ulos</a></li>
 					</ul>
