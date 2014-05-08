@@ -18,6 +18,18 @@ $('.dropdownEventRight').mouseout(function(){
 	});
 });
 
+function deleteEvent(Id){
+	$.ajax({
+		url: 'server.php',
+		data: { 'deleteEventId':Id },
+		method: 'POST',
+		error: function(data){
+		}
+	}).done(function(data){
+		window.location.href=window.location.href;
+	});
+}
+
 function showContent(dom)
 {	
 	var content = $(dom).parent().parent().find('.eventContent');

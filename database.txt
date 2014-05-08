@@ -55,6 +55,7 @@ CREATE TABLE wh_user_messages(
 	umid INT(6) NOT NULL AUTO_INCREMENT PRIMARY KEY,
 	owner INT(6) NOT NULL,
 	message TEXT CHARACTER SET utf8 COLLATE utf8_swedish_ci,
+	message_type INT(1) NOT NULL,
 	VST TIMESTAMP NULL,
 	VET TIMESTAMP NULL,
 	FOREIGN KEY(owner) REFERENCES wh_users(uid)

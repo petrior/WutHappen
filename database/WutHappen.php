@@ -154,10 +154,11 @@
 		{	
 			// checkUser() returns user id from database if email and password are correct.
 			// if wrong email or pass, checkUser() returns false.
-			if($userId = $this->checkUser($user, $pwd))
+			if($user = $this->checkUser($user, $pwd))
 			{
 				$_SESSION['logged'] = true;
-				$_SESSION['user'] = $userId;
+				$_SESSION['user'] = $user["uid"];
+				$_SESSION['admin'] = $user["userlevel"];
 				echo(json_encode(1));
 			}
 			else {
@@ -179,7 +180,7 @@
 			$STH = @$this->DBH->query($sql);
 			if($STH->rowCount() > 0){
 				$row = $STH->fetch();
-				return $row["uid"];
+				return $row;
 			} else {
 				return false;
 			}
@@ -686,67 +687,6 @@
 			}
 		}
 		
-		
-		/*
-		public function uploadImage($file, $user, $size)
-		{
-			try
-			{
-				// Create new Upload-object.
-				$upload = Upload::factory('uploads');
-				// Assign file.
-				$upload->file($file);
-				// Allowed formats: jpeg, gif, png.
-				$upload->set_allowed_mime_types(array('image/jpeg', 'image/gif', 'image/png'));
-				// Limit file size to 0.5 Mbit
-				$upload->set_max_file_size(0.5);
-				
-				// Create a thumbnail object.
-				$thumb = new easyphpthumbnail();
-				
-				$size = $size/1024/1024;
-				
-				if($size > 0.5)
-				{
-					echo("Suurin sallittu tiedostokoko: 0.5 megatavua."); $_GET['id']
-					exit;
-				}
-				
-				// Upload file to server.
-				$results = $upload->upload();
-				if($upload->check())
-				{
-					//echo("moi");
-					echo($results["errors"][0]);
-					//var_dump($results);
-					exit;
-				}
-				
-				$filePath = "./uploads/" . $results["filename"];
-				$thumbPath = "./thumbs/" . $results["filename"];
-				$owner = $user;
-				
-				// Use same name form thumbnail.
-				$thumb->Thumbfilename = $results["filename"];
-				// Folder for thumbnails.
-				$thumb->Thumblocation = "thumbs/";
-				// Set maximum thumbnail height.
-				$thumb->Thumbheight = 150;
-				// Create the thumbnail and save it as a file.
-				$thumb->Createthumb('uploads/' . $results["filename"], 'file');
-				
-			
-				$sql = "INSERT INTO wh_images(owner, url, thumb, VST) VALUES(:owner, :filePath, :thumbPath, CURRENT_TIMESTAMP);";
-				$STH = @$this->DBH->prepare($sql);
-				$STH->execute(array('owner' => $owner, 'filePath' => $filePath, 'thumbPath' => $thumbPath));
-			} catch(Exception $e)
-			{
-				echo($e->getMessage());
-			}
-		}
-		*/
-		
-		
 		public function getImages($user)
 		{
 			$sql = "SELECT * FROM wh_images WHERE owner = :owner ORDER BY VST DESC;";
@@ -773,20 +713,15 @@
 				exit;
 			}
 		
-			$sql = "SELECT U.uid 
+			$sql = "SELECT U.uid, UU.email, UU.name
 			FROM 
-				wh_users U
+				wh_users U, wh_users UU
 			WHERE 
-				U.email = :email 
+				U.email = :email
+				AND UU.uid = :user
 				AND NOT EXISTS (SELECT * FROM wh_friends WHERE person1 = U.uid AND person2 = :user) 
-				AND NOT EXISTS (SELECT * FROM wh_friend_invites WHERE person1 = :user AND person2 = U.uid)";
-			/*SELECT U.uid 
-			FROM 
-				wh_users U 
-			WHERE 
-				U.email = "a@b.fi" 
-				AND NOT EXISTS (SELECT * FROM wh_friends WHERE person1 = 1 AND person2 = 4) 
-				AND NOT EXISTS (SELECT * FROM wh_friend_invites WHERE person1 = 4 AND person2 = U.uid)*/
+				AND NOT EXISTS (SELECT * FROM wh_friend_invites WHERE person1 = :user AND person2 = U.uid AND VET IS NULL)";
+
 			$STH = @$this->DBH->prepare($sql);
 			if($STH->execute(array('email' => $email, 'user' => $user)))
 			{
@@ -798,6 +733,11 @@
 					$STH = $this->DBH->prepare($sql);
 					if($STH->execute(array('user' => $user, 'friend' => $row->uid)))
 					{
+						$message = $row->name . " (" . $row->email . ") haluaa olla kaverisi";
+						$sql = "INSERT INTO wh_user_messages(owner, message, message_type, VST) VALUES(:friend, :message, 1, CURRENT_TIMESTAMP);";
+						$STH = $this->DBH->prepare($sql);
+						$STH->execute(array('friend' => $row->uid, 'message' => $message));
+						
 						echo("Kutsu lähetetty.");
 					}
 					else
@@ -807,7 +747,7 @@
 				}
 				else
 				{
-					echo("Ehkä jo kaveri?");
+					echo("Lisäys epäonnistui.");
 				}
 			}
 		}
@@ -833,22 +773,37 @@
 		}
 		
 		//GET EVENT
-		public function getEvent($eventId){
+		public function getEvent($eventId, $user){
 
 
 			$sql = "SELECT * FROM
 							wh_events 
 						WHERE 
-							eid = :eventId;";
+							eid = :eventId; AND ownerid = :user";
 
 				$STH = $this->DBH->prepare($sql);
-				$STH->execute(array('eventId' => $eventId));
+				$STH->execute(array('eventId' => $eventId, 'user' => $user));
 
 
 				$STH->setFetchMode(PDO::FETCH_ASSOC);
 				$row = $STH->fetch();
 
 				return($row);
+		}
+		
+		// GET USER MESSAGES
+		public function getUserMessages($user)
+		{
+			$sql = "SELECT * FROM wh_user_messages WHERE owner = :user AND VET IS NULL;";
+			$messages = Array();
+			$STH = $this->DBH->prepare($sql);
+			$STH->execute(array('user' => $user));
+			$STH->setFetchMode(PDO::FETCH_OBJ);
+			while($row = $STH->fetch())
+			{
+				$messages[] = $row;
+			}
+			return $messages;
 		}
 	}
 ?>

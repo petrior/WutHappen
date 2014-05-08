@@ -14,6 +14,7 @@
 			$wutHappen = new WutHappen();
 			$wutHappen->SSLon();
 			$wutHappen->startSession();
+			$wutHappen->dbConnect();
 			
 			if($_GET['logout'] == true)
 			{
@@ -24,24 +25,32 @@
 			{
 				$wutHappen->redirect("./login.php");
 			}
+			
+			if(isset($_GET['eventType']))
+					$eventType = $_GET['eventType'];
+				else
+					$eventType = "own";
+			
+			$messages = $wutHappen->getUserMessages($_SESSION['user']);
 		?>
 		<div class="navBar">
 			<ul class="horizontalNav">
 				<li class="dropdownEvent selected">
 					<a href="#">Tapahtumat<img src="./images/arrowDown.png"></a>
 					<ul>
-						<li <?php if($_GET['eventType'] == "own") echo 'class="selected"'; ?>><a href="<?php echo($_SERVER['PHP_SELF'] . "?eventType=own"); ?>">Omat</a></li>
-						<li <?php if($_GET['eventType'] == "others") echo 'class="selected"'; ?>><a href="<?php echo($_SERVER['PHP_SELF'] . "?eventType=others"); ?>">Muiden</a></li>
-						<li <?php if($_GET['eventType'] == "past") echo 'class="selected"'; ?>><a href="<?php echo($_SERVER['PHP_SELF'] . "?eventType=past"); ?>">Menneet</a></li>
+						<li <?php if($eventType == "own") echo 'class="selected"'; ?>><a href="<?php echo($_SERVER['PHP_SELF'] . "?eventType=own"); ?>">Omat</a></li>
+						<li <?php if($eventType == "others") echo 'class="selected"'; ?>><a href="<?php echo($_SERVER['PHP_SELF'] . "?eventType=others"); ?>">Muiden</a></li>
+						<li <?php if($eventType == "past") echo 'class="selected"'; ?>><a href="<?php echo($_SERVER['PHP_SELF'] . "?eventType=past"); ?>">Menneet</a></li>
 						<li><a href="./uusi.php">Uusi</a></li>
 					</ul>
 				</li>
-				<li class="dropdownEvent">
-					<a href="#">Kaverit<img src="./images/arrowDown.png"></a>
-					<ul>
-						<li><a href=".\kaverilista.php">Kaverilista</a></li>
-					</ul>
-				</li>
+				<li><a href=".\kaverilista.php">Kaverilista</a></li>
+				<?php 
+					if(count($messages) > 0)
+					{
+						echo("<li><a id='msgNumber' href='./ilmoitukset.php' class='navIcon'><i class='fa fa-exclamation-circle'></i>" . count($messages) . "</a></li>");
+					}
+				?>
 				<li class="dropdownEventRight floatRight">
 					<a href="#">User</a>
 					<ul>
@@ -52,11 +61,6 @@
 		</div>
 		<div class="container">
 			<?php 
-				if(isset($_GET['eventType']))
-					$eventType = $_GET['eventType'];
-				else
-					$eventType = "own";
-					
 				if($eventType == "own")
 				{
 					echo("<div class='event'><p class='eventOwner'>Tapahtumat \ Omat tapahtumat</p></div>");
@@ -72,7 +76,6 @@
 				
 				$owner = $_SESSION['user'];
 		
-				$wutHappen->dbConnect();
 				$events = $wutHappen->getEvents($eventType, $owner);
 				
 				if(count($events) == 0)

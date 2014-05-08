@@ -344,7 +344,7 @@ $('#uploadImage').click(function(event){
 	{
 		uploadError("Valitse ensin tiedosto.");
 	}
-	else if($('#uploadInput')[0].files[0].size/1024/1024 > 0.5)
+	else if($('#uploadInput')[0].files[0].size/1024/1024 > 8)
 	{
 		uploadError("Maksimi tiedostokoko: 0,5 megatavua.");
 	}

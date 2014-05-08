@@ -133,6 +133,14 @@ table {
 	margin-right:15px !important;
 }
 
+.navIcon {
+	padding:calc(25px - 30px / 2) 5px 0 5px !important;
+}
+
+#msgNumber {
+	color:#DB162A;
+}
+
 /* CONTAINER */
 
 .container {
@@ -221,7 +229,7 @@ table {
 	margin: 3%;
 }
 .kuva{
-	width: 10%;
+	width: 80px;
 	padding: 5px 5px 5px 5px;
 }
 #eventFormImg{
@@ -278,6 +286,7 @@ table {
 /*UUSI TAPAHTUMA*/
 .fa {
 	margin:3px;
+	cursor:pointer;
 }
 .uploadInput{
 	display: none;
@@ -294,4 +303,8 @@ table {
 .friendList tr, td, th {
 	border:1px solid;
 	padding:5px;
+}
+
+.userMessage{
+	font-size:0.9em !important;
 }

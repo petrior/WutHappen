@@ -7,9 +7,9 @@
 		<script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
 		<link rel="stylesheet" type="text/css" href="main.css">
 		<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/themes/smoothness/jquery-ui.css" />
-		<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 		<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js"></script>
 		<script type="text/javascript" src="http://jqueryui.com/ui/i18n/jquery.ui.datepicker-fi.js"></script>
+		<link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
 		<script>
 		  $(function() {
 			$( "#datepicker" ).datepicker();
@@ -45,6 +45,7 @@
 			$wutHappen = new WutHappen();
 			$wutHappen->SSLon();
 			$wutHappen->startSession();
+			$wutHappen->dbConnect();
 			
 			if($_GET['logout'] == true)
 			{
@@ -56,6 +57,7 @@
 				$wutHappen->redirect("./login.php");
 			}
 			
+			$messages = $wutHappen->getUserMessages($_SESSION['user']);
 		?>
 		<div class="navBar">
 			<ul class="horizontalNav">
@@ -68,7 +70,13 @@
 						<li class="selected"><a href="./uusi.php">Uusi</a></li>
 					</ul>
 				</li>
-				<li><a href="#">Kaverit</a></li>
+				<li><a href="./kaverilista.php">Kaverilista</a></li>
+				<?php 
+					if(count($messages) > 0)
+					{
+						echo("<li><a id='msgNumber' href='./ilmiotukset.php' class='navIcon'><i class='fa fa-exclamation-circle'></i>" . count($messages) . "</a></li>");
+					}
+				?>
 				<li class="dropdownEventRight floatRight">
 					<a href="#">User</a>
 					<ul>

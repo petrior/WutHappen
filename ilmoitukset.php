@@ -39,11 +39,11 @@
 						<li><a href="./uusi.php">Uusi</a></li>
 					</ul>
 				</li>
-				<li class="selected"><a href="./kaverilista.php">Kaverilista</a></li>
+				<li><a href="./kaverilista.php">Kaverilista</a></li>
 				<?php 
 					if(count($messages) > 0)
 					{
-						echo("<li><a id='msgNumber' href='./ilmoitukset.php' class='navIcon'><i class='fa fa-exclamation-circle'></i>" . count($messages) . "</a></li>");
+						echo("<li class='selected'><a id='msgNumber' href='#' class='navIcon'><i class='fa fa-exclamation-circle'></i>" . count($messages) . "</a></li>");
 					}
 				?>
 				<li class="dropdownEventRight floatRight">
@@ -55,27 +55,10 @@
 			</ul>
 		</div>
 		<div class="container">
-			<div class="event"><p class="eventOwner">Kaverit \ Kaverilista</p></div>
+			<div class="event"><p class="eventOwner">Ilmoitukset</p></div>
 			<div class="event">
-				<form action="<?php echo($_SERVER['PHP_SELF']); ?>" method="post">
-					<input type="text" name="email" class="eventInput" placeholder="Kaverin sähköposti"></input>
-					<input type="submit" class="createButton" value="Lisää"></input>
-				</form>
-				<table class="friendList">
-					<tr><th>Nimi</th><th>Sähköposti</th></tr>
-					<?php
-					$wutHappen->dbConnect();
-					$friends = $wutHappen->getFriends($_SESSION['user']);
-					foreach($friends as $key=>$value): ?>
-						<tr><td><?php echo($friends[$key]->name); ?></td><td><?php echo($friends[$key]->email); ?></td></tr>
-					<?php endforeach; ?>
-					<?php
-						if(isset($_POST['email']))
-						{
-							$wutHappen->dbConnect();
-							echo($wutHappen->inviteFriend($_POST['email'], $_SESSION['user']));
-						}
-					?>
+				<table>
+					
 				</table>
 			</div>
 		</div>

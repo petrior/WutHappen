@@ -57,7 +57,7 @@
 			}
 			
 			$wutHappen->dbConnect();
-			$event = $wutHappen->getEvent($_GET['id']);
+			$event = $wutHappen->getEvent($_GET['id'], $_SESSION['user']);
 			$uusipaiva = $event['date'];
 			$uusipaiva = str_replace("-",".",$uusipaiva);
 			$d = DateTime::createFromFormat("Y.m.d", $uusipaiva);
@@ -65,6 +65,8 @@
 			
 			$uusikello = substr($event['time'], 0, -3);
 			$uusikello = str_replace(":",".",$uusikello);
+			
+			$messages = $wutHappen->getUserMessages($_SESSION['user']);
 		?>
 		<div class="navBar">
 			<ul class="horizontalNav">
@@ -77,7 +79,13 @@
 						<li class="selected"><a href="./uusi.php">Uusi</a></li>
 					</ul>
 				</li>
-				<li><a href="#">Kaverit</a></li>
+				<li><a href="./kaverilista.php">Kaverilista</a></li>
+				<?php 
+					if(count($messages) > 0)
+					{
+						echo("<li><a id='msgNumber' href='./ilmoitukset.php' class='navIcon'><i class='fa fa-exclamation-circle'></i>" . count($messages) . "</a></li>");
+					}
+				?>
 				<li class="dropdownEventRight floatRight">
 					<a href="#">User</a>
 					<ul>
@@ -99,13 +107,13 @@
 					</form>
 			<form action="<?php echo($_SERVER['PHP_SELF'] . "?id=" . $_GET['id']); ?>" method="post">
 				<img id="eventFormImg" src="<?php echo($event['image']); ?>"></img>
-				<input type="hidden" name="kuva" id="kuva"></input>
+				<input type="hidden" name="kuva" id="kuva" value="<?php echo($event['image']); ?>"></input>
 				<input id="otsikko" class="eventInput" type="text" value="<?php echo($event['header']); ?>" size="40" name="otsikko"></input><br/>
 				<input class="eventInput" type="text" id="datepicker" value="<?php echo($d); ?>" size="40" name="paivamaara"></input></br>
 				<input id="kello" class="eventInput" type="text" value="<?php echo($uusikello); ?>" size="40" name="kello"></input></br>
 				<input type="text" class="eventInput" value="<?php echo($event['location']); ?>" id="paikka" size="40" name="paikka"></input></br>
 				<textarea class="eventInput" id="kuvaus" cols="31" rows="5" type="text" name="kuvaus"><?php echo($event['content']); ?></textarea></br>
-				<input type="submit" class="createButton" value="Päivitä tapahtuma">
+				<input type="submit" class="createButton" value="PÃ¤ivitÃ¤ tapahtuma">
 				<?php
 					if(isset($_POST['kuva']) && 
 					isset($_POST['otsikko']) && 
